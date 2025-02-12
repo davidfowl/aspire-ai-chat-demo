@@ -13,15 +13,16 @@ var model = builder.ExecutionContext.IsPublishMode
          .WithLifetime(ContainerLifetime.Persistent)
          .AddModel("llm", "phi4");
 
-var db = builder.AddAzureCosmosDB("cosmos")
-                .RunAsPreviewEmulator(e => e.WithDataExplorer().WithDataVolume())
-                .AddCosmosDatabase("chats");
+var conversations = builder.AddAzureCosmosDB("cosmos")
+                           .RunAsPreviewEmulator(e => e.WithDataExplorer().WithDataVolume())
+                           .AddCosmosDatabase("db")
+                           .AddContainer("conversations", "/id");
 
 var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
        .WithReference(model)
        .WaitFor(model)
-    // .WithReference(db)
-    // .WaitFor(db)
+       .WithReference(conversations)
+       .WaitFor(conversations)
        .PublishAsAzureContainerApp((infra, app) =>
         {
             app.Configuration.Ingress.AllowInsecure = true;
