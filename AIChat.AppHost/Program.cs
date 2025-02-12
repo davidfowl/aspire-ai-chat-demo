@@ -13,9 +13,15 @@ var model = builder.ExecutionContext.IsPublishMode
          .WithLifetime(ContainerLifetime.Persistent)
          .AddModel("llm", "phi4");
 
+var db = builder.AddAzureCosmosDB("cosmos")
+                .RunAsPreviewEmulator(e => e.WithDataExplorer().WithDataVolume())
+                .AddCosmosDatabase("chats");
+
 var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
        .WithReference(model)
        .WaitFor(model)
+    // .WithReference(db)
+    // .WaitFor(db)
        .PublishAsAzureContainerApp((infra, app) =>
         {
             app.Configuration.Ingress.AllowInsecure = true;
@@ -24,15 +30,15 @@ var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
 builder.AddDockerfile("chatui", "../chatui")
        .WithHttpEndpoint(targetPort: 80, env: "PORT")
        .WithEnvironment(c =>
-       {
-           var be = chatapi.GetEndpoint("http");
+        {
+            var be = chatapi.GetEndpoint("http");
 
-           // In the docker file, caddy uses the host and port without the scheme
-           var hostAndPort = ReferenceExpression.Create($"{be.Property(EndpointProperty.Host)}:{be.Property(EndpointProperty.Port)}");
+            // In the docker file, caddy uses the host and port without the scheme
+            var hostAndPort = ReferenceExpression.Create($"{be.Property(EndpointProperty.Host)}:{be.Property(EndpointProperty.Port)}");
 
-           c.EnvironmentVariables["BACKEND_URL"] = hostAndPort;
-           c.EnvironmentVariables["SPAN"] = "chatui";
-       })
+            c.EnvironmentVariables["BACKEND_URL"] = hostAndPort;
+            c.EnvironmentVariables["SPAN"] = "chatui";
+        })
         .WithExternalHttpEndpoints()
         .WithOtlpExporter();
 

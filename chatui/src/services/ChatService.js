@@ -3,6 +3,36 @@ class ChatService {
         this.backendUrl = backendUrl;
     }
 
+    async getChats() {
+        const response = await fetch(`${this.backendUrl}/chat`);
+        if (!response.ok) {
+            throw new Error('Error fetching chats');
+        }
+        return await response.json();
+    }
+
+    async getChatMessages(chatId) {
+        const response = await fetch(`${this.backendUrl}/chat/${chatId}`);
+        if (!response.ok) {
+            throw new Error('Error fetching chat messages');
+        }
+        return await response.json();
+    }
+
+    async createChat(name) {
+        const response = await fetch(`${this.backendUrl}/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name })
+        });
+        if (!response.ok) {
+            throw new Error('Failed to create chat');
+        }
+        return await response.json();
+    }
+
     async *sendPrompt(prompt) {
         const response = await fetch(`${this.backendUrl}/chat`, {
             method: 'POST',
