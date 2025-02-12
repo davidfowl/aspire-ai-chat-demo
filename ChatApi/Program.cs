@@ -19,7 +19,6 @@ app.MapGet("/api/chat", () =>
     return conversations.Values;
 });
 
-
 app.MapGet("/api/chat/{id}", (Guid id) =>
 {
     if (!conversations.TryGetValue(id, out var conversation))
@@ -31,12 +30,17 @@ app.MapGet("/api/chat/{id}", (Guid id) =>
     {
         id = index,
         sender = m.Role.Value,
-        content = m.Text
+        text = m.Text
     }));
 });
 
 app.MapPost("/api/chat", (NewConversation newConversation) =>
 {
+    if (string.IsNullOrWhiteSpace(newConversation.Name))
+    {
+        return Results.BadRequest();
+    }
+
     var conversation = new Conversation(Guid.CreateVersion7(), newConversation.Name, []);
 
     conversations.TryAdd(conversation.Id, conversation);

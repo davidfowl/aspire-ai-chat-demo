@@ -30,7 +30,7 @@ const App = () => {
         setSelectedChatId(chatId);
         try {
             const data = await chatService.getChatMessages(chatId);
-            setMessages(data.messages);
+            setMessages(data);
         } catch (error) {
             console.error('Error fetching chat messages:', error);
         }
@@ -48,11 +48,11 @@ const App = () => {
         const botMessageId = Date.now() + 1;
         setMessages(prevMessages => [
             ...prevMessages,
-            { id: botMessageId, sender: 'bot', text: '' }
+            { id: botMessageId, sender: 'assistant', text: '' }
         ]);
 
         try {
-            const stream = chatService.sendPrompt(prompt);
+            const stream = chatService.sendPrompt(selectedChatId, prompt);
 
             setPrompt('');
 
@@ -95,7 +95,7 @@ const App = () => {
 
     return (
         <div style={{ display: 'flex', maxWidth: '900px', margin: '2rem auto', fontFamily: 'Arial, sans-serif' }}>
-            <div style={{ width: '200px', marginRight: '1rem' }}>
+            <div style={{ width: '250px', flexShrink: 0, marginRight: '1rem' }}>
                 <h2>Chats</h2>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                     {chats.map(chat => (
@@ -126,7 +126,8 @@ const App = () => {
                             padding: '10px',
                             borderRadius: '20px',
                             border: '1px solid #ccc',
-                            marginBottom: '10px'
+                            marginBottom: '10px',
+                            boxSizing: 'border-box'
                         }}
                     />
                     <button
@@ -163,14 +164,14 @@ const App = () => {
                             key={msg.id}
                             style={{
                                 display: 'flex',
-                                justifyContent: msg.sender === 'bot' ? 'flex-start' : 'flex-end',
+                                justifyContent: msg.sender === 'assistant' ? 'flex-start' : 'flex-end',
                                 marginBottom: '1rem'
                             }}
                         >
                             <div
                                 style={{
-                                    background: msg.sender === 'bot' ? '#e5e5ea' : '#007aff',
-                                    color: msg.sender === 'bot' ? '#000' : '#fff',
+                                    background: msg.sender === 'assistant' ? '#e5e5ea' : '#007aff',
+                                    color: msg.sender === 'assistant' ? '#000' : '#fff',
                                     padding: '10px 15px',
                                     borderRadius: '20px',
                                     maxWidth: '70%'

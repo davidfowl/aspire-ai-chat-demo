@@ -33,8 +33,8 @@ class ChatService {
         return await response.json();
     }
 
-    async *sendPrompt(prompt) {
-        const response = await fetch(`${this.backendUrl}/chat`, {
+    async *sendPrompt(id, prompt) {
+        const response = await fetch(`${this.backendUrl}/chat/${id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: prompt })
