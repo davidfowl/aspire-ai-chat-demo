@@ -30,7 +30,7 @@ public class ChatStreamingCoordinator(
 
         async Task StreamMessages()
         {
-            var allChunks = new List<StreamingChatCompletionUpdate>();
+            var allChunks = new List<ChatResponseUpdate>();
             var backlog = state.Backlog;
 
 
@@ -47,7 +47,7 @@ public class ChatStreamingCoordinator(
 
             try
             {
-                await foreach (var update in chatClient.CompleteStreamingAsync(messages).WithCancellation(cancellationToken))
+                await foreach (var update in chatClient.GetStreamingResponseAsync(messages).WithCancellation(cancellationToken))
                 {
                     if (update.Text is not null)
                     {
@@ -80,7 +80,7 @@ public class ChatStreamingCoordinator(
             {
                 if (allChunks.Count > 0)
                 {
-                    var fullMessage = allChunks.ToChatCompletion().Message;
+                    var fullMessage = allChunks.ToChatResponse().Message;
                     await SaveMessageToDatabase(conversationId, assistantReplyId, fullMessage);
                 }
             }
