@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SKConsole", "SKConsole.csproj", "{A67B0B3D-3808-D4F6-6FA6-2F2DB0BB21D4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A67B0B3D-3808-D4F6-6FA6-2F2DB0BB21D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A67B0B3D-3808-D4F6-6FA6-2F2DB0BB21D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A67B0B3D-3808-D4F6-6FA6-2F2DB0BB21D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A67B0B3D-3808-D4F6-6FA6-2F2DB0BB21D4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE87F0EB-6CCF-40F3-8D3A-2CC00D1C4C47}
+	EndGlobalSection
+EndGlobal
