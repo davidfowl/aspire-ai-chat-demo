@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.1.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.37.0" />
   </ItemGroup>
 
   <ItemGroup>
