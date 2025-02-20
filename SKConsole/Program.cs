@@ -3,11 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.Ollama;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using OllamaSharp;
 using Microsoft.Extensions.AI;
-using System.Net;
 
 namespace SKConsole
 {
@@ -21,7 +17,7 @@ namespace SKConsole
             await RunUsingOllamaChatClient();
 
             // run chat console app using Semantic Kernel
-            // await RunUsingSemanticKernel();
+            await RunUsingSemanticKernel();
             
         }
         /*
