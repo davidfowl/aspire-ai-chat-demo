@@ -18,13 +18,15 @@ namespace SKConsole
 
 
             // uncomment to run chat console app using OllamaChatClient Directly
-            //await RunUsingOllamaChatClient();
+            await RunUsingOllamaChatClient();
 
             // run chat console app using Semantic Kernel
-            await RunUsingSemanticKernel();
+            // await RunUsingSemanticKernel();
             
         }
-
+        /*
+        * This does not currently work due to a mismatch between Microsoft AI Extensions and SK 
+        */
         private static async Task RunUsingSemanticKernel(){
             var builder = Kernel.CreateBuilder();
 
