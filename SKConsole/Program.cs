@@ -7,6 +7,7 @@ using Microsoft.SemanticKernel.Connectors.Ollama;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OllamaSharp;
 using Microsoft.Extensions.AI;
+using System.Net;
 
 namespace SKConsole
 {
@@ -14,9 +15,18 @@ namespace SKConsole
     {
         static async Task Main(string[] args)
         {
-            var builder = Kernel.CreateBuilder();
 
-            // https://learn.microsoft.com/en-us/dotnet/ai/quickstarts/quickstart-local-ai
+
+            // uncomment to run chat console app using OllamaChatClient Directly
+            //await RunUsingOllamaChatClient();
+
+            // run chat console app using Semantic Kernel
+            await RunUsingSemanticKernel();
+            
+        }
+
+        private static async Task RunUsingSemanticKernel(){
+            var builder = Kernel.CreateBuilder();
 
             /* // Uncomment to use OpenAI instead
             // Populate values from your OpenAI deployment
@@ -28,7 +38,6 @@ namespace SKConsole
             builder.AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
             */
 
-            /* - Semantic Kernel Implementation Throws Error
             // Ollama Chat Completion Service
             // Currently in alpha so disabling warning. 
             #pragma warning disable SKEXP0070
@@ -68,9 +77,7 @@ namespace SKConsole
                 // Add the message from the agent to the chat history
                 history.AddMessage(result.Role, result.Content ?? string.Empty);
             } while (userInput is not null);
-            */
-
-            await RunUsingOllamaChatClient();
+            
         }
 
         private static async Task RunUsingOllamaChatClient(){
@@ -94,7 +101,7 @@ namespace SKConsole
                 var response = "";
                 await foreach (var item in
                     chatClient.GetStreamingResponseAsync(chatHistory))
-                    //chatClient.CompleteStreamingAsync(chatHistory))
+                    //chatClient.CompleteStreamingAsync(chatHistory)) - this is what's in the docs and its
                 {
                     Console.Write(item.Text);
                     response += item.Text;
