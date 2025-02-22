@@ -1,5 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var envvars = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+
 // This is the AI model our application will use
 var model = builder.AddAIModel("llm")
                    .RunAsOllama("phi4", c =>
