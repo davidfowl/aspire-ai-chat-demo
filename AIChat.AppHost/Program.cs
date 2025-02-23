@@ -15,7 +15,8 @@ var model = builder.AddAIModel("llm")
                    // Uncomment to use Azure OpenAI instead in local dev, but requires an Azure OpenAI API key
                    // .PublishAsAzureOpenAI("gpt-4o", "2024-05-13", );
                    // Uncomment to use Azure AI Inference instead in local dev, but requires an Azure AI Inference API key
-                   //.AsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
+                   //.RunAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
+                   //.PublishAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
 
 // We use Cosmos DB for our conversation history
 var conversations = builder.AddAzureCosmosDB("cosmos")

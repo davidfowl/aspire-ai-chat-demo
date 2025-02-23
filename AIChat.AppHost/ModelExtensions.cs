@@ -66,42 +66,57 @@ public static class ModelExtensions
         return builder;
     }
 
-    public static IResourceBuilder<AIModel> AsAzureAIInference(this IResourceBuilder<AIModel> builder, string modelName, string endpoint, IResourceBuilder<ParameterResource> apiKey)
+    public static IResourceBuilder<AIModel> RunAsAzureAIInference(this IResourceBuilder<AIModel> builder, string modelName, string endpoint, IResourceBuilder<ParameterResource> apiKey)
     {
         if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
         {
-            builder.Reset();
-
-            // See: https://github.com/dotnet/aspire/issues/7641
-            var csb = new ReferenceExpressionBuilder();
-            csb.Append($"Endpoint={endpoint};");
-            csb.Append($"AccessKey={apiKey.Resource};");
-            csb.Append($"Model={modelName}");
-            var cs = csb.Build();
-
-            builder.ApplicationBuilder.AddResource(builder.Resource);
-
-            if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
-            {
-                var csTask = cs.GetValueAsync(default).AsTask();
-                if (!csTask.IsCompletedSuccessfully) throw new InvalidOperationException("Connection string could not be resolved!");
-
-                builder.WithInitialState(new CustomResourceSnapshot
-                {
-                    ResourceType = "Azure AI Inference Model",
-                    State = KnownResourceStates.Running,
-                    Properties = [
-                      new("ConnectionString", csTask.Result ) { IsSensitive = true }
-                    ]
-                });
-            }
-
-            builder.Resource.UnderlyingResource = builder.Resource;
-            builder.Resource.ConnectionString = cs;
-            builder.Resource.Provider = "AzureAIInference";
-
-            return builder;
+            return builder.AsAzureAIInference(modelName, endpoint, apiKey);
         }
+
+        return builder;
+    }
+
+    public static IResourceBuilder<AIModel> PublishAsAzureAIInference(this IResourceBuilder<AIModel> builder, string modelName, string endpoint, IResourceBuilder<ParameterResource> apiKey)
+    {
+        if (builder.ApplicationBuilder.ExecutionContext.IsPublishMode)
+        {
+            return builder.AsAzureAIInference(modelName, endpoint, apiKey);
+        }
+
+        return builder;
+    }
+
+    public static IResourceBuilder<AIModel> AsAzureAIInference(this IResourceBuilder<AIModel> builder, string modelName, string endpoint, IResourceBuilder<ParameterResource> apiKey)
+    {
+        builder.Reset();
+
+        // See: https://github.com/dotnet/aspire/issues/7641
+        var csb = new ReferenceExpressionBuilder();
+        csb.Append($"Endpoint={endpoint};");
+        csb.Append($"AccessKey={apiKey.Resource};");
+        csb.Append($"Model={modelName}");
+        var cs = csb.Build();
+
+        builder.ApplicationBuilder.AddResource(builder.Resource);
+
+        if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
+        {
+            var csTask = cs.GetValueAsync(default).AsTask();
+            if (!csTask.IsCompletedSuccessfully) throw new InvalidOperationException("Connection string could not be resolved!");
+
+            builder.WithInitialState(new CustomResourceSnapshot
+            {
+                ResourceType = "Azure AI Inference Model",
+                State = KnownResourceStates.Running,
+                Properties = [
+                  new("ConnectionString", csTask.Result ) { IsSensitive = true }
+                ]
+            });
+        }
+
+        builder.Resource.UnderlyingResource = builder.Resource;
+        builder.Resource.ConnectionString = cs;
+        builder.Resource.Provider = "AzureAIInference";
 
         return builder;
     }
