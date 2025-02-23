@@ -1,3 +1,5 @@
+using Azure.AI.Inference;
+using Azure;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 
@@ -17,6 +19,7 @@ public static class ChatClientExtensions
             ClientChatProvider.Ollama => builder.AddOllamaClient(connectionName, connectionInfo),
             ClientChatProvider.OpenAI => builder.AddOpenAIClient(connectionName, connectionInfo),
             ClientChatProvider.AzureOpenAI => builder.AddAzureOpenAIClient(connectionName).AddChatClient(connectionInfo.SelectedModel),
+            ClientChatProvider.AzureAIInference => builder.AddAzureInferenceClient(connectionName, connectionInfo),
             _ => throw new NotSupportedException($"Unsupported provider: {connectionInfo.Provider}")
         };
 
@@ -36,6 +39,18 @@ public static class ChatClientExtensions
             settings.Key = connectionInfo.AccessKey;
         })
         .AddChatClient(connectionInfo.SelectedModel);
+    }
+
+    private static ChatClientBuilder AddAzureInferenceClient(this IHostApplicationBuilder builder, string connectionName, ChatClientConnectionInfo connectionInfo)
+    {
+        return builder.Services.AddChatClient(sp =>
+        {
+            var credential = new AzureKeyCredential(connectionInfo.AccessKey!);
+
+            var client = new ChatCompletionsClient(connectionInfo.Endpoint, credential, new AzureAIInferenceClientOptions());
+
+            return client.AsChatClient(connectionInfo.SelectedModel);
+        });
     }
 
     private static ChatClientBuilder AddOllamaClient(this IHostApplicationBuilder builder, string connectionName, ChatClientConnectionInfo connectionInfo)

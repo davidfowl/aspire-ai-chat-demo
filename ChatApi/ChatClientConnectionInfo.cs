@@ -71,5 +71,6 @@ public enum ClientChatProvider
     Unknown,
     Ollama,
     OpenAI,
-    AzureOpenAI
+    AzureOpenAI,
+    AzureAIInference,
 }
