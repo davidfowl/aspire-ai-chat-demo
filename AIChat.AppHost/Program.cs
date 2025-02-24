@@ -12,11 +12,14 @@ var model = builder.AddAIModel("llm")
                    // in Parameters:openaikey section of configuration (use user secrets)
                    //.AsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
                    // .PublishAsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
-                   // Uncomment to use Azure OpenAI instead in local dev, but requires an Azure OpenAI API key
-                   // .PublishAsAzureOpenAI("gpt-4o", "2024-05-13", );
                    // Uncomment to use Azure AI Inference instead in local dev, but requires an Azure AI Inference API key
                    //.RunAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
                    //.PublishAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
+                   // Uncomment to use Azure OpenAI instead in local dev, but requires an Azure OpenAI API key
+                   //.PublishAsAzureOpenAI("gpt-4o", b =>
+                   //{
+                   //    b.AddDeployment(new AzureOpenAIDeployment("gpt-4o", "gpt-4o", "2024-05-13"));
+                   //});
 
 // We use Cosmos DB for our conversation history
 var conversations = builder.AddAzureCosmosDB("cosmos")
@@ -24,6 +27,8 @@ var conversations = builder.AddAzureCosmosDB("cosmos")
                            .AddCosmosDatabase("db")
                            .AddContainer("conversations", "/id");
 
+// Redis is used to store and broadcast the live message stream
+// so that multiple clients can connect to the same conversation.
 var cache = builder.AddRedis("cache")
                    .WithRedisInsight();
 

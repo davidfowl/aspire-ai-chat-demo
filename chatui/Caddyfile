@@ -1,33 +1,38 @@
 {
+    # Enable debug mode for detailed logs
     debug
 }
 
 :80 {
-    # Enable OpenTelemetry tracing
+    # Enable OpenTelemetry tracing at the site level.
+    # This will instrument all requests with the span name provided by the SPAN environment variable.
     tracing {
         span {env.SPAN}
     }
 
+    # Set the root directory for serving static files
     root * /usr/share/caddy
 
-    route {
-        # Reverse proxy for API requests
-        @api {
-            path /api/*
-        }
-        reverse_proxy @api {env.BACKEND_URL} {
-            # Set the Host header to the backend service hostname
+    # Handle API requests separately from the SPA
+    handle /api/* {
+        # Reverse proxy any request starting with /api/ to the backend service
+        # The BACKEND_URL environment variable should contain the host:port of the backend service.
+        reverse_proxy {env.BACKEND_URL} {
+            # Override the Host header so that the backend service receives the expected hostname.
             header_up Host {http.reverse_proxy.upstream.hostport}
         }
-
-        # Serve static files
-        file_server
-
-        # Fallback for React Router (ensures React routes work properly)
-        try_files {path} /index.html
     }
 
-    # Enable access logging to console
+    # Handle all other requests for the React single-page application (SPA)
+    handle {
+        # Attempt to serve the requested file. If the file does not exist, fallback to index.html.
+        # This allows client-side routing (e.g., React Router) to work properly.
+        try_files {path} /index.html
+        # Serve the static files from the root directory specified above.
+        file_server
+    }
+
+    # Enable access logging to console for debugging and monitoring purposes.
     log {
         output stdout
         format console

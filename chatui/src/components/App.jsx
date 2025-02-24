@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import ChatService from '../services/ChatService';
+import Sidebar from './Sidebar';
+import ChatContainer from './ChatContainer';
+import VirtualizedChatList from './VirtualizedChatList';
 import './App.css';
 
 const loadingIndicatorId = 'loading-indicator';
@@ -10,17 +13,19 @@ const App = () => {
     const [prompt, setPrompt] = useState('');
     const [chats, setChats] = useState([]);
     const [selectedChatId, setSelectedChatId] = useState(null);
+    const selectedChatIdRef = useRef(null);
     const [loadingChats, setLoadingChats] = useState(true);
     const messagesEndRef = useRef(null);
     const [newChatName, setNewChatName] = useState('');
     const abortControllerRef = useRef(null);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+    const [streamingMessageId, setStreamingMessageId] = useState(null);
+    const { chatId } = useParams();
+    const navigate = useNavigate();
 
-    const backendUrl = '/api';
-    const chatService = new ChatService(backendUrl);
+    const chatService = useMemo(() => new ChatService('/api/chat'), []);
 
     useEffect(() => {
-        // Fetch the list of chats when the component mounts
         const fetchChats = async () => {
             try {
                 const data = await chatService.getChats();
@@ -33,10 +38,116 @@ const App = () => {
         };
 
         fetchChats();
-    }, []);
+    }, [chatId, chatService]);
 
-    const updateMessageById = (id, newText) => {
+    useEffect(() => {
+        if (chatId) {
+            handleChatSelect(chatId);
+        }
+    }, [chatId]);
+
+    const onSelectChat = useCallback((id) => {
+        navigate(`/chat/${id}`);
+    }, [navigate]);
+
+    const scrollToBottom = useCallback((behavior = 'smooth') => {
+        if (messagesEndRef.current && shouldAutoScroll) {
+            messagesEndRef.current.scrollTo({
+                top: messagesEndRef.current.scrollHeight,
+                behavior
+            });
+        }
+    }, [shouldAutoScroll]);
+
+    const handleChatSelect = useCallback(async (id) => {
+        setSelectedChatId(id);
+        selectedChatIdRef.current = id;
+        // Clear the message list immediately on chat switch
+        setMessages([]);
+        let lastMessageId = null;
+        let lastFragmentId = null;
+
+        try {
+            const data = await chatService.getChatMessages(id);
+            const filteredMessages = data.filter(msg => msg.text);
+            const lastMessage = filteredMessages.length > 0 ? filteredMessages[filteredMessages.length - 1] : null;
+            lastMessageId = lastMessage ? lastMessage.id : null;
+
+            setMessages(data);
+            setTimeout(() => scrollToBottom('instant'), 100);
+        } catch (error) {
+            console.error('Error fetching chat messages:', error);
+        }
+
+        const streamChat = async (chatId) => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+
+            let abortController = new AbortController();
+            abortControllerRef.current = abortController;
+            const currentChatId = chatId;
+
+            // Stream messages while the chat is selected and not aborted
+            while (abortController.signal.aborted === false &&
+                currentChatId === selectedChatIdRef.current) {
+
+                console.log('streamChat started:', chatId);
+
+                try {
+                    const stream = chatService.stream(chatId, lastMessageId, lastFragmentId, abortController);
+                    for await (const { id, sender, text, isFinal, fragmentId } of stream) {
+                        if (selectedChatIdRef.current !== currentChatId) {
+                            break;
+                        }
+
+                        console.debug('Received chunk:', id, sender, text, isFinal, lastFragmentId);
+
+                        // Update lastFragmentId for the next chunk
+                        lastFragmentId = fragmentId;
+
+                        if (isFinal) {
+                            // Reset lastMessageId and lastFragmentId when the message is final
+                            lastMessageId = id;
+                            setStreamingMessageId(null);
+
+                            // If the message is empty, skip it
+                            if (!text) continue;
+
+                        } else {
+                            setStreamingMessageId(current => current ? current : id);
+                        }
+
+                        updateMessageById(id, text, sender, isFinal);
+                    }
+                } catch (error) {
+                    console.debug('streamChat error:', chatId, error);
+
+                    if (error.name !== 'AbortError') {
+                        console.error('Streaming error:', error);
+                        setMessages(prev =>
+                            prev.map(msg =>
+                                msg.id === loadingIndicatorId ? { ...msg, text: '[Error in receiving response]', isLoading: false } : msg
+                            )
+                        );
+                    }
+                }
+                finally {
+                    console.log('streamChat finished:', chatId);
+                    setStreamingMessageId(null);
+                }
+            }
+        };
+
+        streamChat(id);
+    }, [chatService, scrollToBottom]);
+
+    const updateMessageById = (id, newText, sender, isFinal = false) => {
         setMessages(prevMessages => {
+            const lastUserMessage = prevMessages.filter(m => m.sender === 'user').slice(-1)[0];
+            if (isFinal && lastUserMessage && lastUserMessage.text === newText) {
+                return prevMessages;
+            }
             const existingMessage = prevMessages.find(msg => msg.id === id);
             if (existingMessage) {
                 return prevMessages.map(msg =>
@@ -44,37 +155,24 @@ const App = () => {
                         ? {
                             ...msg,
                             text: (msg.text === 'Generating reply...' ? newText : msg.text + newText),
-                            isLoading: false
+                            isLoading: false,
+                            sender: sender || msg.sender
                         }
                         : msg
                 );
             } else {
-                return prevMessages
-                    .filter(msg => msg.id !== loadingIndicatorId)
-                    .concat({
-                        id,
-                        sender: 'assistant',
-                        text: newText,
-                        isLoading: false
-                    });
+                return [...prevMessages.filter(msg => msg.id !== loadingIndicatorId),
+                { id, sender, text: newText, isLoading: false },
+                ];
             }
         });
     };
 
-    const scrollToBottom = (behavior = 'smooth') => {
-        if (messagesEndRef.current && shouldAutoScroll) {
-            messagesEndRef.current.scrollTo({
-                top: messagesEndRef.current.scrollHeight,
-                behavior
-            });
-        }
-    };
-
-    const handleScroll = (e) => {
+    const handleScroll = useCallback((e) => {
         const container = e.target;
         const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
         setShouldAutoScroll(isNearBottom);
-    };
+    }, []);
 
     useEffect(() => {
         const container = messagesEndRef.current;
@@ -82,69 +180,22 @@ const App = () => {
             container.addEventListener('scroll', handleScroll);
             return () => container.removeEventListener('scroll', handleScroll);
         }
-    }, []);
+    }, [handleScroll]);
 
     useEffect(() => {
         if (shouldAutoScroll) {
             scrollToBottom();
         }
-    }, [messages]);
+    }, [messages, scrollToBottom]);
 
-    const handleChatSelect = async (chatId) => {
-        setSelectedChatId(chatId);
-        let lastMessageId = null;
-        try {
-            const data = await chatService.getChatMessages(chatId);
-
-            // Filter for messages with text (and optionally matching sender) then take last one.
-            const filteredMessages = data.filter(msg => msg.text && msg.sender === 'assistant');
-            const lastMessage = filteredMessages.length > 0 ? filteredMessages[filteredMessages.length - 1] : null;
-            lastMessageId = lastMessage ? lastMessage.id : null;
-
-            setMessages(data);
-            // Force scroll to bottom on chat selection, using instant scroll
-            setTimeout(() => scrollToBottom('instant'), 100);
-        } catch (error) {
-            console.error('Error fetching chat messages:', error);
-        }
-
-        const streamChat = async (id) => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-            abortControllerRef.current = new AbortController();
-
-            try {
-                const stream = chatService.stream(id, lastMessageId, abortControllerRef.current);
-                for await (const { id, text } of stream) {
-                    console.debug('Received chunk:', id, text);
-
-                    updateMessageById(id, text);
-                }
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Streaming error:', error);
-                    setMessages(prev =>
-                        prev.map(msg =>
-                            msg.id === loadingIndicatorId ? { ...msg, text: '[Error in receiving response]', isLoading: false } : msg
-                        )
-                    );
-                }
-            }
-        };
-
-        streamChat(chatId);
-    };
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
         if (!prompt.trim() || !selectedChatId) return;
+        if (streamingMessageId) return;
 
-        // Add the user's message
         const userMessage = { id: Date.now(), sender: 'user', text: prompt };
         setMessages(prevMessages => [...prevMessages, userMessage]);
 
-        // Show loading indicator
         setMessages(prevMessages => [
             ...prevMessages,
             { id: loadingIndicatorId, sender: 'assistant', text: 'Generating reply...', isLoading: true }
@@ -152,21 +203,18 @@ const App = () => {
 
         try {
             chatService.sendPrompt(selectedChatId, prompt);
-
             setPrompt('');
-
         } catch (error) {
-            console.error('Streaming error:', error);
-            // Optionally update the bot message with an error message
+            console.error('handleSubmit error:', error);
             setMessages(prev =>
                 prev.map(msg =>
                     msg.id === loadingIndicatorId ? { ...msg, text: '[Error in receiving response]', isLoading: false } : msg
                 )
             );
         }
-    };
+    }, [prompt, selectedChatId, streamingMessageId, chatService]);
 
-    const handleNewChatSubmit = async (e) => {
+    const handleNewChatSubmit = useCallback(async (e) => {
         e.preventDefault();
         if (!newChatName.trim()) return;
 
@@ -174,11 +222,11 @@ const App = () => {
             const newChat = await chatService.createChat(newChatName);
             setChats(prevChats => [...prevChats, newChat]);
             setNewChatName('');
-            handleChatSelect(newChat.id);
+            onSelectChat(newChat.id);
         } catch (error) {
-            console.error('Error creating new chat:', error);
+            console.error('handleNewChatSubmit error:', error);
         }
-    };
+    }, [newChatName, chatService, onSelectChat]);
 
     const handleDeleteChat = async (e, chatId) => {
         e.stopPropagation();
@@ -190,78 +238,39 @@ const App = () => {
                 setMessages([]);
             }
         } catch (error) {
-            console.error('Error deleting chat:', error);
+            console.error('handleDeleteChat error:', chatId, error);
         }
     };
 
-    const isNearBottom = () => {
-        if (!messagesEndRef.current) return false;
-        const container = messagesEndRef.current;
-        return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const cancelChat = () => {
+        chatService.cancelChat(streamingMessageId);
     };
 
     return (
         <div className="app-container">
-            <div className="sidebar">
-                <div className="sidebar-header">
-                    <h2>Chats</h2>
-                    {loadingChats && <p>Loading...</p>}
-                </div>
-                <ul className="chat-list">
-                    {chats.map(chat => (
-                        <li
-                            key={chat.id}
-                            onClick={() => handleChatSelect(chat.id)}
-                            className={`chat-item ${selectedChatId === chat.id ? 'selected' : ''}`}
-                        >
-                            <span className="chat-name">{chat.name}</span>
-                            <button
-                                className="delete-chat-button"
-                                onClick={(e) => handleDeleteChat(e, chat.id)}
-                                title="Delete chat"
-                            >
-                                ×
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-                <form onSubmit={handleNewChatSubmit} className="new-chat-form">
-                    <input
-                        type="text"
-                        value={newChatName}
-                        onChange={e => setNewChatName(e.target.value)}
-                        placeholder="New chat name"
-                        className="new-chat-input"
-                    />
-                    <button type="submit" className="new-chat-button">
-                        Create Chat
-                    </button>
-                </form>
-            </div>
-            <div className="chat-container">
-                <div ref={messagesEndRef} className="messages-container">
-                    {messages.map(msg => (
-                        <div key={msg.id} className={`message ${msg.sender}`}>
-                            <div className="message-content">
-                                <ReactMarkdown>{msg.text}</ReactMarkdown>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <form onSubmit={handleSubmit} className="message-form">
-                    <input
-                        type="text"
-                        value={prompt}
-                        onChange={e => setPrompt(e.target.value)}
-                        placeholder="Enter your message..."
-                        disabled={!selectedChatId}
-                        className="message-input"
-                    />
-                    <button type="submit" disabled={!selectedChatId} className="message-button">
-                        Send
-                    </button>
-                </form>
-            </div>
+            <Sidebar
+                chats={chats}
+                selectedChatId={selectedChatId}
+                loadingChats={loadingChats}
+                newChatName={newChatName}
+                setNewChatName={setNewChatName}
+                handleNewChatSubmit={handleNewChatSubmit}
+                handleDeleteChat={handleDeleteChat}
+                onSelectChat={onSelectChat}
+            />
+            <ChatContainer
+                messages={messages}
+                prompt={prompt}
+                setPrompt={setPrompt}
+                handleSubmit={handleSubmit}
+                cancelChat={cancelChat}
+                streamingMessageId={streamingMessageId}
+                messagesEndRef={messagesEndRef}
+                shouldAutoScroll={shouldAutoScroll}
+                renderMessages={() => (
+                    <VirtualizedChatList messages={messages} />
+                )}
+            />
         </div>
     );
 };

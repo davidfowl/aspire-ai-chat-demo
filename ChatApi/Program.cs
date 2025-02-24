@@ -9,6 +9,7 @@ builder.AddCosmosDbContext<AppDbContext>("conversations", "db");
 
 builder.Services.AddSingleton<ChatStreamingCoordinator>();
 builder.Services.AddSingleton<IConversationState, RedisConversationState>();
+builder.Services.AddSingleton<ICancellationManager, RedisCancellationManager>();
 
 var app = builder.Build();
 

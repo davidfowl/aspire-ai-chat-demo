@@ -1,5 +1,7 @@
-async function* streamJsonValues(response, signal) {
-    const reader = response.body.getReader();
+import { MessageFragment } from "../types/ChatTypes";
+
+async function* streamJsonValues(response: Response, signal: AbortSignal): AsyncGenerator<MessageFragment> {
+    const reader: ReadableStreamDefaultReader<Uint8Array> = response.body!.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
     let pos = 0;
@@ -7,7 +9,7 @@ async function* streamJsonValues(response, signal) {
     let startedArray = false; // Have we seen the initial '['?
 
     // Helper: skip whitespace starting at index `start` in string `str`.
-    function skipWhitespace(str, start) {
+    function skipWhitespace(str: string, start: number): number {
         while (start < str.length && /\s/.test(str[start])) {
             start++;
         }
@@ -61,12 +63,12 @@ async function* streamJsonValues(response, signal) {
 
             // At this point we are at the start of a new JSON value.
             const valueStart = pos;
-            let end = null;
+            let end: number | null = null;
             const firstChar = buffer[pos];
 
             // For objects or arrays, use a stack to find the matching close.
             if (firstChar === "{" || firstChar === "[") {
-                let stack = [firstChar];
+                let stack: string[] = [firstChar];
                 pos++;
                 let inString = false;
                 let escapeCount = 0;
@@ -172,7 +174,7 @@ async function* streamJsonValues(response, signal) {
     }
     if (buffer) {
         try {
-            yield JSON.parse(buffer);
+            yield JSON.parse(buffer) as MessageFragment;
         } catch (e) {
             console.warn("Incomplete JSON value discarded:", buffer);
         }
@@ -180,4 +182,3 @@ async function* streamJsonValues(response, signal) {
 }
 
 export { streamJsonValues };
-
