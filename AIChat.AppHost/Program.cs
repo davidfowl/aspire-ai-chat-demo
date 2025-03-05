@@ -5,7 +5,7 @@ var model = builder.AddAIModel("llm")
                    .RunAsOllama("phi4", c =>
                    {
                        // Enable to enable GPU support (if your machine has a GPU)
-                       c.WithGPUSupport();
+                       //c.WithGPUSupport();
                        c.WithLifetime(ContainerLifetime.Persistent);
                    });
                    // Uncomment to use OpenAI instead in local dev, but requires an OpenAI API key
