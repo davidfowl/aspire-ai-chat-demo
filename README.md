@@ -8,11 +8,11 @@ Aspire AI Chat is a full-stack chat sample that combines modern technologies to 
   The backend is built with **ASP.NET Core** and interacts with an LLM using **Microsoft.Extensions.AI**. It leverages `IChatClient` to abstract the interaction between the API and the model. Chat responses are streamed back to the client using stream JSON array responses.
 
 - **Data & Persistence:**  
-  Uses **Entity Framework Core** with **CosmosDB** for flexible, cloud-based NoSQL storage. This project utilizes the **new preview CosmosDB emulator** for efficient local development.
+  Uses **Entity Framework Core** with **PostgreSQL** for reliable relational data storage. The project includes database migrations for easy setup and version control of the schema.
 
 - **AI & Chat Capabilities:**  
   - Uses **Ollama** (via OllamaSharp) for local inference, enabling context-aware responses.  
-  - In production, the application switches to [**Azure OpenAI**](https://azure.microsoft.com/en-us/products/ai-services/openai-service) for LLM capabilities.
+  - In production, the application switches to [**OpenAI**](https://openai.com/) for LLM capabilities.
 
 - **Frontend UI:**  
   Built with **React**, the user interface offers a modern and interactive chat experience. The React application is built and hosted using [**Caddy**](https://caddyserver.com/).
@@ -34,6 +34,6 @@ to run the application in a container.
 ### Configuration
 
 - By default, the application uses **Ollama** for local inference.  
-- To use **Azure OpenAI**, set the appropriate configuration values (e.g., API keys, endpoints).  
-- Ensure **CosmosDB Emulator** is running locally or configure an external CosmosDB instance.
+- To use **OpenAI**, set the appropriate configuration values (e.g., API keys, endpoints).  
+- The PostgreSQL database will be automatically created and migrated when running with Aspire.
 
