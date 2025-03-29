@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="AIChat.AppHost/AIChat.AppHost.csproj" />
+  <Project Path="AIChat.ServiceDefaults/AIChat.ServiceDefaults.csproj" />
+  <Project Path="ChatApi/ChatApi.csproj" />
+</Solution>
