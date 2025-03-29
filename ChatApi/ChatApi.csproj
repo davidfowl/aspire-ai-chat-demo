@@ -7,16 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.1.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.3.0-preview.1.25114.11" />
+    <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.3.1-beta.252" />
+    <PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.4.0-preview.1.25176.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AIChat.ServiceDefaults\AIChat.ServiceDefaults.csproj" />
-    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.1.0-preview.1.25118.7" />
-    <PackageReference Include="OllamaSharp" Version="5.0.7" />
-    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.1.0-preview.1.25118.7" />
-    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.1.0-preview.1.25118.7" />
+    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.2.0-preview.1.25176.12" />
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.2.0-preview.1.25176.12" />
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.2.0-preview.1.25176.12" />
   </ItemGroup>
 
 </Project>

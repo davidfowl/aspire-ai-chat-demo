@@ -1,4 +1,8 @@
+using Aspire.Hosting.Docker;
+
 var builder = DistributedApplication.CreateBuilder(args);
+
+builder.AddDockerComposePublisher();
 
 // This is the AI model our application will use
 var model = builder.AddAIModel("llm")
@@ -7,10 +11,10 @@ var model = builder.AddAIModel("llm")
                        // Enable to enable GPU support (if your machine has a GPU)
                        c.WithGPUSupport();
                        c.WithLifetime(ContainerLifetime.Persistent);
-                   });
+                   })
                    // Uncomment to use OpenAI instead in local dev, but requires an OpenAI API key
                    // in Parameters:openaikey section of configuration (use user secrets)
-                   //.AsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
+                   .AsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
                    // .PublishAsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
                    // Uncomment to use Azure AI Inference instead in local dev, but requires an Azure AI Inference API key
                    //.RunAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
@@ -52,3 +56,4 @@ builder.AddNpmApp("chatui", "../chatui")
        .WithOtlpExporter();
 
 builder.Build().Run();
+

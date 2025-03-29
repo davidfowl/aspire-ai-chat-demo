@@ -54,8 +54,8 @@ public class ChatStreamingCoordinator(
 
                 if (allChunks.Count > 0)
                 {
-                    var fullMessage = allChunks.ToChatResponse().Message;
-                    await SaveAssistantMessageToDatabase(conversationId, assistantReplyId, fullMessage.Text!);
+                    var fullMessage = allChunks.ToChatResponse().Text;
+                    await SaveAssistantMessageToDatabase(conversationId, assistantReplyId, fullMessage);
                 }
             }
             catch (OperationCanceledException)
@@ -64,8 +64,8 @@ public class ChatStreamingCoordinator(
 
                 if (allChunks.Count > 0)
                 {
-                    var fullMessage = allChunks.ToChatResponse().Message;
-                    await SaveAssistantMessageToDatabase(conversationId, assistantReplyId, fullMessage.Text!);
+                    var fullMessage = allChunks.ToChatResponse().Text;
+                    await SaveAssistantMessageToDatabase(conversationId, assistantReplyId, fullMessage);
                 }
             }
             catch (Exception ex)
