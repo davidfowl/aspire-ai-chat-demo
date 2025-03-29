@@ -27,10 +27,10 @@ var model = builder.AddAIModel("llm")
                    //});
 
 // We use Cosmos DB for our conversation history
-var db = builder.AddAzureCosmosDB("cosmos")
+var conversations = builder.AddAzureCosmosDB("cosmos")
                            .RunAsPreviewEmulator(e => e.WithImagePullPolicy(ImagePullPolicy.Always).WithDataExplorer().WithDataVolume())
-                           .AddCosmosDatabase("db");
-db.AddContainer("conversations", "/id");
+                           .AddCosmosDatabase("db")
+                           .AddContainer("conversations", "/id");
 
 // Redis is used to store and broadcast the live message stream
 // so that multiple clients can connect to the same conversation.
@@ -40,8 +40,8 @@ var cache = builder.AddRedis("cache")
 var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
                      .WithReference(model)
                      .WaitFor(model)
-                     .WithReference(db)
-                     .WaitFor(db)
+                     .WithReference(conversations)
+                     .WaitFor(conversations)
                      .WithReference(cache)
                      .WaitFor(cache);
 
