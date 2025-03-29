@@ -112,6 +112,7 @@ public static class ModelExtensions
             csb.Append($"Endpoint={endpoint};");
             csb.Append($"AccessKey={apiKey};");
             csb.Append($"Model={modelName}");
+            csb.AppendLiteral("Provider=AzureAIInference;");
         });
 
         builder.Resource.UnderlyingResource = cs.Resource;
@@ -134,6 +135,7 @@ public static class ModelExtensions
         {
             csb.Append($"AccessKey={apiKey};");
             csb.Append($"Model={modelName}");
+            csb.AppendLiteral("Provider=AzureAIInference;");
         });
 
         builder.Resource.UnderlyingResource = cs.Resource;
