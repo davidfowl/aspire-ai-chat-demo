@@ -1,24 +1,37 @@
+using Aspire.Hosting.Azure;
+using Azure.Provisioning.AppContainers;
+
 public static class ProxyExtensions
 {
-    public static IResourceBuilder<NodeAppResource> WithReverseProxy(this IResourceBuilder<NodeAppResource> builder, IResourceBuilder<IResourceWithEndpoints> target)
+    public static IResourceBuilder<NodeAppResource> WithReverseProxy(this IResourceBuilder<NodeAppResource> builder, EndpointReference upstreamEndpoint)
     {
         if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
         {
-            var upstreamEndpoint = target.GetEndpoint("http");
-
             return builder.WithEnvironment("BACKEND_URL", upstreamEndpoint);
         }
 
-        return builder.PublishAsDockerFile(c =>
+        if (upstreamEndpoint.Scheme == "http")
         {
-            var endpointName = builder.ApplicationBuilder.ExecutionContext.PublisherName switch
+            // Configure the target resource to allow http when deploying to Azure
+            // container apps
+            static void AllowHttp(AzureResourceInfrastructure infra, ContainerApp app)
             {
-                "docker-compose" => "http",
-                _ => "https",
-            };
+                app.Configuration.Ingress.AllowInsecure = true;
+            }
+            
+            if (upstreamEndpoint.Resource is ProjectResource p)
+            {
+                builder.ApplicationBuilder.CreateResourceBuilder(p)
+                    .PublishAsAzureContainerApp(AllowHttp);
+            }
+            else if (upstreamEndpoint.Resource is ContainerResource c)
+            {
+                builder.ApplicationBuilder.CreateResourceBuilder(c)
+                    .PublishAsAzureContainerApp(AllowHttp);
+            }
+        }
 
-            c.WithReverseProxy(target.GetEndpoint(endpointName));
-        });
+        return builder.PublishAsDockerFile(c => c.WithReverseProxy(upstreamEndpoint));
     }
 
     public static IResourceBuilder<ContainerResource> WithReverseProxy(this IResourceBuilder<ContainerResource> builder, EndpointReference upstreamEndpoint)

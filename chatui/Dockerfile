@@ -7,7 +7,7 @@ COPY . .
 RUN npm run build
 
 # Production Stage: Serve the app with Caddy
-FROM caddy:2.6-alpine
+FROM caddy:2.9-alpine
 WORKDIR /usr/share/caddy
 
 # Copy built static files including index.html, etc.
