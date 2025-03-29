@@ -121,6 +121,11 @@ public static class ModelExtensions
         return builder;
     }
 
+    public static IResourceBuilder<AIModel> AsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, Func<IDistributedApplicationBuilder, IResourceBuilder<ParameterResource>> addApiKey)
+    {
+        return builder.AsOpenAI(modelName, addApiKey(builder.ApplicationBuilder));
+    }
+
     public static IResourceBuilder<AIModel> AsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, IResourceBuilder<ParameterResource> apiKey)
     {
         builder.Reset();
