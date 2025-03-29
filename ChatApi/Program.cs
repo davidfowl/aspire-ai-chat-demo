@@ -4,10 +4,11 @@ builder.AddServiceDefaults();
 
 builder.AddChatClient("llm");
 builder.AddRedisClient("cache");
-builder.AddCosmosDbContext<AppDbContext>("conversations");
+builder.AddNpgsqlDbContext<AppDbContext>("conversations");
 
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<ChatStreamingCoordinator>();
+builder.Services.AddHostedService<EnsureDatabaseCreatedHostedService>();
 
 builder.Services.AddSingleton<IConversationState, RedisConversationState>();
 builder.Services.AddSingleton<ICancellationManager, RedisCancellationManager>();

@@ -6,9 +6,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-         modelBuilder.Entity<Conversation>()
-            .HasPartitionKey(c => c.Id)
-            .ToContainer("conversations");
+        modelBuilder.Entity<Conversation>().OwnsMany(c => c.Messages, c => c.ToJson());
     }
 }
 
