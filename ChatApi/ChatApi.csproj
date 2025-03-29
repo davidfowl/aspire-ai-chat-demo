@@ -8,14 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.3.1-beta.252" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="9.4.0-preview.1.25178.3" />
     <PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.4.0-preview.1.25176.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AIChat.ServiceDefaults\AIChat.ServiceDefaults.csproj" />
-    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.2.0-preview.1.25176.12" />
-    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.2.0-preview.1.25176.12" />
-    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.2.0-preview.1.25176.12" />
+    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.2.0-preview.1.25178.3" />
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.2.0-preview.1.25178.3" />
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.2.0-preview.1.25178.3" />
   </ItemGroup>
 
 </Project>

@@ -18,9 +18,7 @@ public static class ProxyExtensions
         return builder.WithEnvironment(context =>
         {
             // In the docker file, caddy uses the host and port without the scheme
-            var hostAndPort = ReferenceExpression.Create($"{upstreamEndpoint.Property(EndpointProperty.Host)}:{upstreamEndpoint.Property(EndpointProperty.Port)}");
-
-            context.EnvironmentVariables["BACKEND_URL"] = hostAndPort;
+            context.EnvironmentVariables["BACKEND_URL"] = upstreamEndpoint.Property(EndpointProperty.HostAndPort);
             context.EnvironmentVariables["SPAN"] = builder.Resource.Name;
         });
     }

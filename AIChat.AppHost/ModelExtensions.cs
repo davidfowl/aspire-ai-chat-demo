@@ -27,21 +27,21 @@ public static class ModelExtensions
         return builder;
     }
 
-    public static IResourceBuilder<AIModel> RunAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, IResourceBuilder<ParameterResource> apiKey)
+    public static IResourceBuilder<AIModel> RunAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, Func<IDistributedApplicationBuilder, IResourceBuilder<ParameterResource>> addApiKey)
     {
         if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
         {
-            return builder.AsOpenAI(modelName, apiKey);
+            return builder.AsOpenAI(modelName, addApiKey(builder.ApplicationBuilder));
         }
 
         return builder;
     }
 
-    public static IResourceBuilder<AIModel> PublishAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, IResourceBuilder<ParameterResource> apiKey)
+    public static IResourceBuilder<AIModel> PublishAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, Func<IDistributedApplicationBuilder, IResourceBuilder<ParameterResource>> addApiKey)
     {
         if (builder.ApplicationBuilder.ExecutionContext.IsPublishMode)
         {
-            return builder.AsOpenAI(modelName, apiKey);
+            return builder.AsOpenAI(modelName, addApiKey(builder.ApplicationBuilder));
         }
 
         return builder;

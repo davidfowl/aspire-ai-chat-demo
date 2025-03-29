@@ -2,6 +2,7 @@ using Aspire.Hosting.Docker;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Allows aspire publish -p docker-compose to work
 builder.AddDockerComposePublisher();
 
 // This is the AI model our application will use
@@ -15,7 +16,7 @@ var model = builder.AddAIModel("llm")
                    // Uncomment to use OpenAI instead in local dev, but requires an OpenAI API key
                    // in Parameters:openaikey section of configuration (use user secrets)
                    //.AsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
-                   .PublishAsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
+                   .PublishAsOpenAI("gpt-4o", b => b.AddParameter("openaikey", secret: true));
                    // Uncomment to use Azure AI Inference instead in local dev, but requires an Azure AI Inference API key
                    //.RunAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
                    //.PublishAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
