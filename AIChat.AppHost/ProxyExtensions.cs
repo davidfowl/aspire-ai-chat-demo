@@ -1,13 +1,24 @@
 public static class ProxyExtensions
 {
-    public static IResourceBuilder<NodeAppResource> WithReverseProxy(this IResourceBuilder<NodeAppResource> builder, EndpointReference upstreamEndpoint)
+    public static IResourceBuilder<NodeAppResource> WithReverseProxy(this IResourceBuilder<NodeAppResource> builder, IResourceBuilder<IResourceWithEndpoints> target)
     {
         if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
         {
+            var upstreamEndpoint = target.GetEndpoint("http");
+
             return builder.WithEnvironment("BACKEND_URL", upstreamEndpoint);
         }
 
-        return builder.PublishAsDockerFile(c => c.WithReverseProxy(upstreamEndpoint));
+        return builder.PublishAsDockerFile(c =>
+        {
+            var endpointName = builder.ApplicationBuilder.ExecutionContext.PublisherName switch
+            {
+                "docker-compose" => "http",
+                _ => "https",
+            };
+
+            c.WithReverseProxy(target.GetEndpoint(endpointName));
+        });
     }
 
     public static IResourceBuilder<ContainerResource> WithReverseProxy(this IResourceBuilder<ContainerResource> builder, EndpointReference upstreamEndpoint)

@@ -157,7 +157,7 @@ public static class ModelExtensions
 }
 
 // A resource representing an AI model.
-public class AIModel(string name) : Resource(name), IResourceWithConnectionString
+public class AIModel(string name) : Resource(name), IResourceWithConnectionString, IResourceWithoutLifetime
 {
     internal string? Provider { get; set; }
     internal IResourceWithConnectionString? UnderlyingResource { get; set; }

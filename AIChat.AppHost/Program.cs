@@ -16,7 +16,7 @@ var model = builder.AddAIModel("llm")
                    // Uncomment to use OpenAI instead in local dev, but requires an OpenAI API key
                    // in Parameters:openaikey section of configuration (use user secrets)
                    //.AsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
-                   .PublishAsOpenAI("gpt-4o", b => b.AddParameter("openaikey", secret: true));
+                   .AsOpenAI("gpt-4o", builder.AddParameter("openaikey", secret: true));
                    // Uncomment to use Azure AI Inference instead in local dev, but requires an Azure AI Inference API key
                    //.RunAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
                    //.PublishAsAzureAIInference("DeepSeek-R1", "", builder.AddParameter("azureaiinferencekey", secret: true));
@@ -27,10 +27,10 @@ var model = builder.AddAIModel("llm")
                    //});
 
 // We use Cosmos DB for our conversation history
-var conversations = builder.AddAzureCosmosDB("cosmos")
-                           .RunAsPreviewEmulator(e => e.WithDataExplorer().WithDataVolume())
-                           .AddCosmosDatabase("db")
-                           .AddContainer("conversations", "/id");
+var db = builder.AddAzureCosmosDB("cosmos")
+                           .RunAsPreviewEmulator(e => e.WithImagePullPolicy(ImagePullPolicy.Always).WithDataExplorer().WithDataVolume())
+                           .AddCosmosDatabase("db");
+db.AddContainer("conversations", "/id");
 
 // Redis is used to store and broadcast the live message stream
 // so that multiple clients can connect to the same conversation.
@@ -40,19 +40,15 @@ var cache = builder.AddRedis("cache")
 var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
                      .WithReference(model)
                      .WaitFor(model)
-                     .WithReference(conversations)
-                     .WaitFor(conversations)
+                     .WithReference(db)
+                     .WaitFor(db)
                      .WithReference(cache)
-                     .WaitFor(cache)
-                     .PublishAsAzureContainerApp((infra, app) =>
-                      {
-                          app.Configuration.Ingress.AllowInsecure = true;
-                      });
+                     .WaitFor(cache);
 
 builder.AddNpmApp("chatui", "../chatui")
        .WithNpmPackageInstallation()
        .WithHttpEndpoint(env: "PORT")
-       .WithReverseProxy(chatapi.GetEndpoint("http"))
+       .WithReverseProxy(chatapi)
        .WithExternalHttpEndpoints()
        .WithOtlpExporter();
 

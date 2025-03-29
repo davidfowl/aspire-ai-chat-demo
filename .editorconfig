@@ -2,3 +2,6 @@
 
 # ASPIRECOSMOSDB001: Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 dotnet_diagnostic.ASPIRECOSMOSDB001.severity = none
+
+# ASPIREPROXYENDPOINTS001: Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+dotnet_diagnostic.ASPIREPROXYENDPOINTS001.severity = none

@@ -4,7 +4,7 @@ builder.AddServiceDefaults();
 
 builder.AddChatClient("llm");
 builder.AddRedisClient("cache");
-builder.AddCosmosDbContext<AppDbContext>("conversations", "db");
+builder.AddCosmosDbContext<AppDbContext>("conversations");
 
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<ChatStreamingCoordinator>();
