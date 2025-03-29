@@ -20,8 +20,7 @@ public static class ModelExtensions
             var ollamaModel = ollama.AddModel(builder.Resource.Name, model);
 
             builder.Resource.UnderlyingResource = ollamaModel.Resource;
-            builder.Resource.ConnectionString = ollamaModel.Resource.ConnectionStringExpression;
-            builder.Resource.Provider = "Ollama";
+            builder.Resource.ConnectionString = ReferenceExpression.Create($"{ollamaModel};Provider=Ollama");
         }
 
         return builder;
@@ -57,8 +56,7 @@ public static class ModelExtensions
 
         builder.Resource.UnderlyingResource = openAIModel.Resource;
         // Add the model name to the connection string
-        builder.Resource.ConnectionString = ReferenceExpression.Create($"{openAIModel};Model={modelName}");
-        builder.Resource.Provider = "AzureOpenAI";
+        builder.Resource.ConnectionString = ReferenceExpression.Create($"{openAIModel};Model={modelName};AzureOpenAI");
 
         return builder;
     }
@@ -111,13 +109,12 @@ public static class ModelExtensions
         {
             csb.Append($"Endpoint={endpoint};");
             csb.Append($"AccessKey={apiKey};");
-            csb.Append($"Model={modelName}");
+            csb.Append($"Model={modelName};");
             csb.AppendLiteral("Provider=AzureAIInference;");
         });
 
         builder.Resource.UnderlyingResource = cs.Resource;
         builder.Resource.ConnectionString = cs.Resource.ConnectionStringExpression;
-        builder.Resource.Provider = "AzureAIInference";
 
         return builder;
     }
@@ -134,13 +131,12 @@ public static class ModelExtensions
         var cs = builder.ApplicationBuilder.AddConnectionString(builder.Resource.Name, csb =>
         {
             csb.Append($"AccessKey={apiKey};");
-            csb.Append($"Model={modelName}");
-            csb.AppendLiteral("Provider=AzureAIInference;");
+            csb.Append($"Model={modelName};");
+            csb.AppendLiteral("Provider=OpenAI");
         });
 
         builder.Resource.UnderlyingResource = cs.Resource;
         builder.Resource.ConnectionString = cs.Resource.ConnectionStringExpression;
-        builder.Resource.Provider = "OpenAI";
 
         return builder;
     }
@@ -159,30 +155,16 @@ public static class ModelExtensions
         }
 
         builder.Resource.ConnectionString = null;
-        builder.Resource.Provider = null;
     }
 }
 
 // A resource representing an AI model.
 public class AIModel(string name) : Resource(name), IResourceWithConnectionString, IResourceWithoutLifetime
 {
-    internal string? Provider { get; set; }
     internal IResourceWithConnectionString? UnderlyingResource { get; set; }
     internal ReferenceExpression? ConnectionString { get; set; }
 
     public ReferenceExpression ConnectionStringExpression =>
-        Build();
-
-    public ReferenceExpression Build()
-    {
-        var connectionString = ConnectionString ?? throw new InvalidOperationException("No connection string available.");
-
-        if (Provider is null)
-        {
-            throw new InvalidOperationException("No provider configured.");
-        }
-
-        return ReferenceExpression.Create($"{connectionString};Provider={Provider}");
-    }
+        ConnectionString ?? throw new InvalidOperationException("No connection string available.");
 }
 
