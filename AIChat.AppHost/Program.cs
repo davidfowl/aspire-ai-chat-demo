@@ -10,7 +10,10 @@ var model = builder.AddAIModel("llm")
                    .RunAsOllama("phi4", c =>
                    {
                        // Enable to enable GPU support (if your machine has a GPU)
-                       c.WithGPUSupport();
+                       if (!OperatingSystem.IsMacOS())
+                       {
+                           c.WithGPUSupport();
+                       }
                        c.WithLifetime(ContainerLifetime.Persistent);
                    })
                    .PublishAsOpenAI("gpt-4o", b => b.AddParameter("openaikey", secret: true));
