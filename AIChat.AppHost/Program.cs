@@ -20,6 +20,7 @@ var model = builder.AddAIModel("llm")
 
 // We use Postgres for our conversation history
 var db = builder.AddPostgres("pg")
+                .WithDataVolume(builder.ExecutionContext.IsPublishMode ? "pgvolume" : null)
                 .WithPgAdmin()
                 .AddDatabase("conversations");
 
