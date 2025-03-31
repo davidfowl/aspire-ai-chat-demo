@@ -1,5 +1,3 @@
-using Aspire.Hosting.Docker;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Allows aspire publish -p docker-compose to work
