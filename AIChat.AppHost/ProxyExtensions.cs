@@ -2,9 +2,6 @@ public static class ProxyExtensions
 {
     public static IResourceBuilder<NodeAppResource> WithReverseProxy(this IResourceBuilder<NodeAppResource> builder, EndpointReference upstreamEndpoint)
     {
-        // BUG: https://github.com/dotnet/aspire/issues/8345
-        builder.WithRelationship(upstreamEndpoint.Resource, "Resource");
-
         if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
         {
             return builder.WithEnvironment("BACKEND_URL", upstreamEndpoint);

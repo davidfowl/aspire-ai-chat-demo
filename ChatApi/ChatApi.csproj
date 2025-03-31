@@ -15,8 +15,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AIChat.ServiceDefaults\AIChat.ServiceDefaults.csproj" />
-    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.2.0-preview.1.25180.1" />
-    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.2.0-preview.1.25180.1" />
+    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.2.0-preview.1.25180.2" />
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.2.0-preview.1.25180.2" />
   </ItemGroup>
 
 </Project>
