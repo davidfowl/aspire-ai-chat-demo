@@ -49,7 +49,7 @@ public static class ChatClientExtensions
 
             var client = new ChatCompletionsClient(connectionInfo.Endpoint, credential, new AzureAIInferenceClientOptions());
 
-            return client.AsChatClient(connectionInfo.SelectedModel);
+            return client.AsIChatClient(connectionInfo.SelectedModel);
         });
     }
 
