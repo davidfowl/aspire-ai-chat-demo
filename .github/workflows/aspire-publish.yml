@@ -1,0 +1,29 @@
+name: Aspire Publish Pipeline
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.x'
+
+    - name: Install Aspire CLI
+      run: dotnet tool install --global aspire.cli --prerelease
+
+    - name: Run Aspire Publish
+      run: aspire publish -p docker-compose -o artifacts
+      working-directory: AiChat.AppHost
