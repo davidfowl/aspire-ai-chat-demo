@@ -24,4 +24,4 @@ jobs:
 
     - name: Run Aspire Publish
       run: aspire publish -p docker-compose -o artifacts
-      working-directory: AiChat.AppHost
+      working-directory: AIChat.AppHost
