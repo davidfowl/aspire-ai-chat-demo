@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ['*'] # Trigger on any branch
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
