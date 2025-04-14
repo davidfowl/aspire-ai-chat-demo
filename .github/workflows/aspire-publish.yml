@@ -1,0 +1,44 @@
+name: Aspire Publish Pipeline
+
+on:
+  push:
+    branches: ['*'] # Trigger on any branch
+  pull_request:
+    branches: ['*'] # Trigger on any branch
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.x'
+
+    - name: Install Aspire CLI
+      run: dotnet tool install --global aspire.cli --prerelease
+
+    - name: Run Aspire Publish
+      run: aspire publish -p docker-compose -o artifacts
+      working-directory: AIChat.AppHost
+
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Tag and Push Container Images
+      run: |
+        BUILD_NUMBER=${{ github.run_number }}
+        BRANCH_NAME=${{ github.ref_name }}
+        SANITIZED_BRANCH_NAME=$(echo "${BRANCH_NAME}" | sed 's#[^a-zA-Z0-9._-]#-#g')
+        docker tag chatui:latest ghcr.io/${{ github.repository_owner }}/chatui:${SANITIZED_BRANCH_NAME}-${BUILD_NUMBER}
+        docker push ghcr.io/${{ github.repository_owner }}/chatui:${SANITIZED_BRANCH_NAME}-${BUILD_NUMBER}
+        docker tag chatapi:latest ghcr.io/${{ github.repository_owner }}/chatapi:${SANITIZED_BRANCH_NAME}-${BUILD_NUMBER}
+        docker push ghcr.io/${{ github.repository_owner }}/chatapi:${SANITIZED_BRANCH_NAME}-${BUILD_NUMBER}
