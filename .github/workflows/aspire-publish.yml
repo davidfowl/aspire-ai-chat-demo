@@ -2,11 +2,9 @@ name: Aspire Publish Pipeline
 
 on:
   push:
-    branches:
-      - '*'
+    branches: ['*'] # Trigger on any branch
   pull_request:
-    branches:
-      - '*'
+    branches: ['*'] # Trigger on any branch
 
 jobs:
   publish:
