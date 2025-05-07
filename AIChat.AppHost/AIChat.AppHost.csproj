@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.3.0-preview.1.25256.40" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.3.0-preview.1.25257.2" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,13 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.0-preview.1.25256.40" />
-    <PackageReference Include="Aspire.Hosting.Docker" Version="9.3.0-preview.1.25256.40" />
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.3.0-preview.1.25256.40" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="9.3.0-preview.1.25256.40" />
-    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.3.0-preview.1.25256.40" />
-    <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.3.0-preview.1.25256.40" />
-    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="9.3.0-preview.1.25256.40" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.0-preview.1.25257.2" />
+    <PackageReference Include="Aspire.Hosting.Docker" Version="9.3.0-preview.1.25257.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.3.0-preview.1.25257.2" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="9.3.0-preview.1.25257.2" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.3.0-preview.1.25257.2" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.3.0-preview.1.25257.2" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="9.3.0-preview.1.25257.2" />
   </ItemGroup>
 
   <ItemGroup>
