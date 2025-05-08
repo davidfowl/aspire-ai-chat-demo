@@ -11,6 +11,9 @@ public static class DashboardExtensions
 
             builder.Eventing.Subscribe<BeforeStartEvent>((e, ct) =>
             {
+                // We loop over all resources and set the OTLP endpoint to the dashboard
+                // we should make WithOtlpExporter() add an annotation so we can detect this
+                // automatically in the future.
                 foreach (var r in e.Model.Resources.OfType<IResourceWithEnvironment>())
                 {
                     if (r == dashboard.Resource)
