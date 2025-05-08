@@ -1,13 +1,24 @@
+name: "aspire-ai-chat"
 services:
+  dashboard:
+    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest"
+    ports:
+      - "8000:18888"
+      - "8001:18889"
+    networks:
+      - "aspire"
   pg:
-    image: "docker.io/library/postgres:17.2"
+    image: "docker.io/library/postgres:17.4"
     environment:
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "${PG_PASSWORD}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "pg"
     ports:
-      - "8000:5432"
+      - "8002:5432"
     volumes:
       - type: "volume"
         target: "/var/lib/postgresql/data"
@@ -24,8 +35,11 @@ services:
       - "/bin/sh"
     environment:
       REDIS_PASSWORD: "${CACHE_PASSWORD}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "cache"
     ports:
-      - "8001:6379"
+      - "8003:6379"
     networks:
       - "aspire"
   chatapi:
@@ -35,13 +49,16 @@ services:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
-      HTTP_PORTS: "8002"
+      HTTP_PORTS: "8004"
       ConnectionStrings__llm: "AccessKey=${OPENAIKEY};Model=gpt-4o;Provider=OpenAI"
       ConnectionStrings__conversations: "Host=pg;Port=5432;Username=postgres;Password=${PG_PASSWORD};Database=conversations"
       ConnectionStrings__cache: "cache:6379,password=${CACHE_PASSWORD}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "chatapi"
     ports:
-      - "8003:8002"
       - "8005:8004"
+      - "8007:8006"
     depends_on:
       pg:
         condition: "service_started"
@@ -52,12 +69,15 @@ services:
   chatui:
     image: "${CHATUI_IMAGE}"
     environment:
-      NODE_ENV: "development"
+      NODE_ENV: "production"
       PORT: "80"
-      BACKEND_URL: "chatapi:8002"
+      BACKEND_URL: "chatapi:8004"
       SPAN: "chatui"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "chatui"
     ports:
-      - "8006:80"
+      - "8008:80"
     networks:
       - "aspire"
 networks:

@@ -7,6 +7,8 @@ builder.AddDockerComposeEnvironment("env")
            file.Name = "aspire-ai-chat";
        });
 
+builder.AddDashboard();
+
 // This is the AI model our application will use
 var model = builder.AddAIModel("llm")
                    .RunAsOllama("phi4", c =>
