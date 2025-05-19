@@ -7,7 +7,11 @@ public static class DashboardExtensions
             // The name aspire-dashboard is special cased and excluded from the default
             var dashboard = builder.AddContainer("dashboard", "mcr.microsoft.com/dotnet/nightly/aspire-dashboard")
                    .WithHttpEndpoint(targetPort: 18888)
-                   .WithHttpEndpoint(name: "otlp", targetPort: 18889);
+                   .WithHttpEndpoint(name: "otlp", targetPort: 18889)
+                   .PublishAsDockerComposeService((_, service) =>
+                   {
+                       service.Restart = "always";
+                   });
 
             builder.Eventing.Subscribe<BeforeStartEvent>((e, ct) =>
             {

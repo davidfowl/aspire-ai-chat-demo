@@ -21,7 +21,12 @@ public static class ChatClientExtensions
         // Add OpenTelemetry tracing for the ChatClient activity source
         chatClientBuilder.UseOpenTelemetry().UseLogging();
 
-        builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource("Experimental.Microsoft.Extensions.AI"));
+        // This is the default name of the trace source and meter
+        var telemetryName = "Experimental.Microsoft.Extensions.AI";
+
+        builder.Services.AddOpenTelemetry()
+               .WithTracing(t => t.AddSource(telemetryName))
+               .WithMetrics(m => m.AddMeter(telemetryName));
 
         return builder;
     }
