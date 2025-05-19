@@ -1,6 +1,7 @@
 import React, { useEffect, ReactNode, RefObject } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message } from '../types/ChatTypes';
+import LandingPage from './LandingPage';
 
 interface ChatContainerProps {
     messages: Message[];
@@ -12,6 +13,7 @@ interface ChatContainerProps {
     messagesEndRef: RefObject<HTMLDivElement | null>;
     shouldAutoScroll: boolean;
     renderMessages: () => ReactNode;
+    onExampleClick?: (text: string) => void;
 }
 
 const ChatContainer: React.FC<ChatContainerProps> = ({
@@ -23,7 +25,8 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     streamingMessageId,
     messagesEndRef,
     shouldAutoScroll,
-    renderMessages
+    renderMessages,
+    onExampleClick
 }: ChatContainerProps) => {
     // Scroll only if near the bottom
     useEffect(() => {
@@ -36,19 +39,10 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         <div className="chat-container">
             <div ref={messagesEndRef} className="messages-container">
                 {messages.length === 0 && (
-                    <div className="landing-content">
-                        <h1>Chat with AI</h1>
-                        <div className="examples-grid">
-                            <div className="example-card">
-                                <h3>💡 Examples</h3>
-                                <ul>
-                                    <li>"Explain quantum computing in simple terms"</li>
-                                    <li>"Got any creative ideas for a 10 year old's birthday?"</li>
-                                    <li>"How do I make an HTTP request in Javascript?"</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                    <LandingPage onExampleClick={text => {
+                        setPrompt(text);
+                        handleSubmit(new Event('submit') as any);
+                    }} />
                 )}
                 {messages.map(msg => (
                     <div key={msg.id} className={`message ${msg.sender}`}>

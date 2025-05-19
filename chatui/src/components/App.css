@@ -340,38 +340,39 @@ body {
 
 .examples-grid {
     display: grid;
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
     margin-top: 40px;
+    padding: 0 20px;
 }
 
 .example-card {
-    background: #444654;
-    border-radius: 12px;
-    padding: 20px;
+    background: #40414f;
+    border: 1px solid #565869;
+    border-radius: 8px;
+    padding: 16px;
     text-align: left;
-}
-
-.example-card h3 {
-    margin: 0 0 16px 0;
-    font-size: 1.1rem;
-    color: #ececf1;
-}
-
-.example-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.example-card li {
-    padding: 8px 0;
-    color: #ececf1;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #ececf1;
+    width: 100%;
 }
 
-.example-card li:hover {
-    opacity: 0.8;
+.example-card:hover {
+    background: #2a2b32;
+}
+
+.example-emoji {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.example-text {
+    font-size: 0.95rem;
+    line-height: 1.4;
 }
 
 /* Refine existing message styles */
