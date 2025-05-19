@@ -6,6 +6,7 @@ import Sidebar from './Sidebar';
 import ChatContainer from './ChatContainer';
 import VirtualizedChatList from './VirtualizedChatList';
 import './App.css';
+import { nanoid } from 'nanoid';          // lightweight id helper (already in many React projects; falls back to simple Date.now() if not installed)
 
 const loadingIndicatorId = 'loading-indicator';
 
@@ -176,31 +177,54 @@ const App: React.FC = () => {
         }
     }, [messages, scrollToBottom]);
 
+    const handleNewChat = useCallback(() => {
+        setSelectedChatId(null);
+        setMessages([]);
+        navigate('/');
+    }, [navigate]);
+
+    const generateChatTitle = (text: string): string => {
+        // Take first 40 chars of first line, or "New Chat" if empty
+        const firstLine = text.split('\n')[0].trim();
+        return firstLine.length > 40 ? firstLine.substring(0, 37) + '...' : firstLine || 'New Chat';
+    };
+
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!prompt.trim() || !selectedChatId) return;
-        if (streamingMessageId) return;
+        if (!prompt.trim() || streamingMessageId) return;
 
-        const userMessage = { id: `${Date.now()}`, sender: 'user', text: prompt } as Message;
-        setMessages(prevMessages => [...prevMessages, userMessage]);
+        const userMessage = { id: nanoid(), sender: 'user', text: prompt } as Message;
+        setMessages(prev => [...prev, userMessage]);
 
-        setMessages(prevMessages => [
-            ...prevMessages,
+        setMessages(prev => [
+            ...prev,
             { id: loadingIndicatorId, sender: 'assistant', text: 'Generating reply...' }
         ]);
 
         try {
-            chatService.sendPrompt(selectedChatId, prompt);
+            let activeChatId = selectedChatId;
+            if (!activeChatId) {
+                const title = generateChatTitle(prompt);
+                const newChat = await chatService.createChat(title);
+                setChats(prev => [...prev, newChat]);
+                activeChatId = newChat.id;
+                setSelectedChatId(activeChatId);
+                navigate(`/chat/${activeChatId}`);
+            }
+
+            await chatService.sendPrompt(activeChatId!, prompt);
             setPrompt('');
         } catch (error) {
             console.error('handleSubmit error:', error);
             setMessages(prev =>
                 prev.map(msg =>
-                    msg.id === loadingIndicatorId ? { ...msg, text: '[Error in receiving response]' } : msg
+                    msg.id === loadingIndicatorId
+                        ? { ...msg, text: '[Error in receiving response]' }
+                        : msg
                 )
             );
         }
-    }, [prompt, selectedChatId, streamingMessageId, chatService]);
+    }, [prompt, selectedChatId, streamingMessageId, chatService, navigate]);
 
     const handleNewChatSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -241,11 +265,8 @@ const App: React.FC = () => {
                 chats={chats}
                 selectedChatId={selectedChatId}
                 loadingChats={loadingChats}
-                newChatName={newChatName}
-                setNewChatName={setNewChatName}
-                handleNewChatSubmit={handleNewChatSubmit}
                 handleDeleteChat={handleDeleteChat}
-                onSelectChat={onSelectChat}
+                onNewChat={handleNewChat}
             />
             <ChatContainer
                 messages={messages}

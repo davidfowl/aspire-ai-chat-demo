@@ -6,29 +6,28 @@ interface SidebarProps {
     chats: Chat[];
     selectedChatId: string | null;
     loadingChats: boolean;
-    newChatName: string;
-    setNewChatName: (name: string) => void;
-    handleNewChatSubmit: (e: React.FormEvent) => void;
     handleDeleteChat: (e: React.MouseEvent, chatId: string) => void;
-    onSelectChat?: (id: string) => void; // Make this optional since it's not used in the implementation
+    onNewChat: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
     chats,
     selectedChatId,
     loadingChats,
-    newChatName,
-    setNewChatName,
-    handleNewChatSubmit,
-    handleDeleteChat
+    handleDeleteChat,
+    onNewChat
 }) => {
     const navigate = useNavigate();
+    
     return (
         <div className="sidebar">
             <div className="sidebar-header">
                 <h2>Chats</h2>
                 {loadingChats && <p>Loading...</p>}
             </div>
+            <button onClick={onNewChat} className="new-chat-button sidebar-new-chat">
+                + New chat
+            </button>
             <ul className="chat-list">
                 {chats.map(chat => (
                     <li
@@ -47,18 +46,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </li>
                 ))}
             </ul>
-            <form onSubmit={handleNewChatSubmit} className="new-chat-form">
-                <input
-                    type="text"
-                    value={newChatName}
-                    onChange={e => setNewChatName(e.target.value)}
-                    placeholder="New chat name"
-                    className="new-chat-input"
-                />
-                <button type="submit" className="new-chat-button">
-                    Create Chat
-                </button>
-            </form>
         </div>
     );
 };
