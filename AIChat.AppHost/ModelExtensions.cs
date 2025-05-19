@@ -71,13 +71,17 @@ public static class ModelExtensions
     private static void Reset(this IResourceBuilder<AIModel> builder)
     {
         // Reset the properties of the AIModel resource
-        if (builder.Resource.UnderlyingResource is { } underlyingResource)
+        IResource? underlyingResource = builder.Resource.UnderlyingResource;
+
+        if (underlyingResource is not null)
         {
             builder.ApplicationBuilder.Resources.Remove(underlyingResource);
 
-            if (underlyingResource is IResourceWithParent resourceWithParent)
+            while (underlyingResource is IResourceWithParent resourceWithParent)
             {
                 builder.ApplicationBuilder.Resources.Remove(resourceWithParent.Parent);
+
+                underlyingResource = resourceWithParent.Parent;
             }
         }
 
