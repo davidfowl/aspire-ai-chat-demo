@@ -46,7 +46,8 @@ builder.AddNpmApp("chatui", "../chatui")
        .WithHttpEndpoint(env: "PORT")
        .WithReverseProxy(chatapi.GetEndpoint("http"))
        .WithExternalHttpEndpoints()
-       .WithOtlpExporter();
+       .WithOtlpExporter()
+       .WithEnvironment("BROWSER", "none");
 
 builder.Build().Run();
 
