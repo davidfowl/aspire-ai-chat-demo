@@ -2,12 +2,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // Publish this as a Docker Compose application
 builder.AddDockerComposeEnvironment("env")
+       .WithDashboard(db => db.WithBrowserPort(8085))
        .ConfigureComposeFile(file =>
        {
            file.Name = "aspire-ai-chat";
        });
-
-builder.AddDashboard();
 
 // This is the AI model our application will use
 var model = builder.AddAIModel("llm")
