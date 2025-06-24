@@ -2,7 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // Publish this as a Docker Compose application
 builder.AddDockerComposeEnvironment("env")
-       .WithDashboard(db => db.WithBrowserPort(8085))
+       .WithDashboard(db => db.WithHostPort(8085))
        .ConfigureComposeFile(file =>
        {
            file.Name = "aspire-ai-chat";

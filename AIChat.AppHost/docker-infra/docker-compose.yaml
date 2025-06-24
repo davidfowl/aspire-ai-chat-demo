@@ -10,7 +10,7 @@ services:
       - "aspire"
     restart: "always"
   pg:
-    image: "docker.io/library/postgres:17.4"
+    image: "docker.io/library/postgres:17.5"
     environment:
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
