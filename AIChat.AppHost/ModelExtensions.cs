@@ -26,43 +26,42 @@ public static class ModelExtensions
         return builder;
     }
 
-    public static IResourceBuilder<AIModel> RunAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, Func<IDistributedApplicationBuilder, IResourceBuilder<ParameterResource>> addApiKey)
+    public static IResourceBuilder<AIModel> RunAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName)
     {
         if (builder.ApplicationBuilder.ExecutionContext.IsRunMode)
         {
-            return builder.AsOpenAI(modelName, addApiKey(builder.ApplicationBuilder));
+            return builder.AsOpenAI(modelName);
         }
 
         return builder;
     }
 
-    public static IResourceBuilder<AIModel> PublishAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, Func<IDistributedApplicationBuilder, IResourceBuilder<ParameterResource>> addApiKey)
+    public static IResourceBuilder<AIModel> PublishAsOpenAI(this IResourceBuilder<AIModel> builder, string modelName)
     {
         if (builder.ApplicationBuilder.ExecutionContext.IsPublishMode)
         {
-            return builder.AsOpenAI(modelName, addApiKey(builder.ApplicationBuilder));
+            return builder.AsOpenAI(modelName);
         }
 
         return builder;
     }
 
-    public static IResourceBuilder<AIModel> AsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, Func<IDistributedApplicationBuilder, IResourceBuilder<ParameterResource>> addApiKey)
-    {
-        return builder.AsOpenAI(modelName, addApiKey(builder.ApplicationBuilder));
-    }
-
-    public static IResourceBuilder<AIModel> AsOpenAI(this IResourceBuilder<AIModel> builder, string modelName, IResourceBuilder<ParameterResource> apiKey)
+    public static IResourceBuilder<AIModel> AsOpenAI(this IResourceBuilder<AIModel> builder, string modelName)
     {
         builder.Reset();
+
+        var apiKey = builder.ApplicationBuilder.AddParameter($"{builder.Resource.Name}-openai-api-key")
+        .WithDescription("OpenAI API Key https://platform.openai.com/api-keys", enableMarkdown: true);
 
         var cs = builder.ApplicationBuilder.AddConnectionString(builder.Resource.Name, csb =>
         {
             csb.Append($"AccessKey={apiKey};");
             csb.Append($"Model={modelName};");
+            csb.AppendLiteral("Endpoint=https://api.openai.com/v1;");
             csb.AppendLiteral("Provider=OpenAI");
         });
 
-        builder.Resource.UnderlyingResource = cs.Resource;
+        builder.Resource.UnderlyingResource = apiKey.Resource;
         builder.Resource.ConnectionString = cs.Resource.ConnectionStringExpression;
 
         return builder;
@@ -70,6 +69,21 @@ public static class ModelExtensions
 
     private static void Reset(this IResourceBuilder<AIModel> builder)
     {
+        IResource? GetParentResource(IResource resource)
+        {
+            if (resource is IResourceWithParent parentResource)
+            {
+                return parentResource.Parent;
+            }
+
+            if (resource.TryGetAnnotationsOfType<ResourceRelationshipAnnotation>(out var relationshipAnnotations))
+            {
+                return relationshipAnnotations.FirstOrDefault(r => r.Type == "Parent")?.Resource;
+            }
+
+            return null;
+        }
+
         // Reset the properties of the AIModel resource
         IResource? underlyingResource = builder.Resource.UnderlyingResource;
 
@@ -77,11 +91,11 @@ public static class ModelExtensions
         {
             builder.ApplicationBuilder.Resources.Remove(underlyingResource);
 
-            while (underlyingResource is IResourceWithParent resourceWithParent)
+            while (GetParentResource(underlyingResource) is IResource parent)
             {
-                builder.ApplicationBuilder.Resources.Remove(resourceWithParent.Parent);
+                builder.ApplicationBuilder.Resources.Remove(parent);
 
-                underlyingResource = resourceWithParent.Parent;
+                underlyingResource = parent;
             }
         }
 
@@ -92,10 +106,12 @@ public static class ModelExtensions
 // A resource representing an AI model.
 public class AIModel(string name) : Resource(name), IResourceWithConnectionString, IResourceWithoutLifetime
 {
-    internal IResourceWithConnectionString? UnderlyingResource { get; set; }
+    // For tracking
+    internal IResource? UnderlyingResource { get; set; }
     internal ReferenceExpression? ConnectionString { get; set; }
 
     public ReferenceExpression ConnectionStringExpression =>
         ConnectionString ?? throw new InvalidOperationException("No connection string available.");
 }
+
 

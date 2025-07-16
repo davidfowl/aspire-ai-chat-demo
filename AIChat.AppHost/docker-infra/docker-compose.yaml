@@ -46,7 +46,7 @@ services:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       HTTP_PORTS: "${CHATAPI_PORT}"
-      ConnectionStrings__llm: "AccessKey=${OPENAIKEY};Model=gpt-4o;Provider=OpenAI"
+      ConnectionStrings__llm: "AccessKey=${LLM_OPENAI_API_KEY};Model=gpt-4.1;Endpoint=https://api.openai.com/v1;Provider=OpenAI"
       ConnectionStrings__conversations: "Host=pg;Port=5432;Username=postgres;Password=${PG_PASSWORD};Database=conversations"
       ConnectionStrings__cache: "cache:6379,password=${CACHE_PASSWORD}"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
