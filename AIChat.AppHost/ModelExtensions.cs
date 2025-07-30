@@ -50,8 +50,8 @@ public static class ModelExtensions
     {
         builder.Reset();
 
-        var apiKey = builder.ApplicationBuilder.AddParameter($"{builder.Resource.Name}-openai-api-key")
-        .WithDescription("OpenAI API Key https://platform.openai.com/api-keys", enableMarkdown: true);
+        var apiKey = builder.ApplicationBuilder.AddParameter($"{builder.Resource.Name}-openai-api-key", secret:true)
+                                               .WithDescription("OpenAI API Key https://platform.openai.com/api-keys", enableMarkdown: true);
 
         var cs = builder.ApplicationBuilder.AddConnectionString(builder.Resource.Name, csb =>
         {

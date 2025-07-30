@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.4.0-preview.1.25365.33" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.4.0" />
     <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.4.0-preview.1.250420-0640" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.7.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AIChat.ServiceDefaults\AIChat.ServiceDefaults.csproj" />
-    <PackageReference Include="Aspire.OpenAI" Version="9.4.0-preview.1.25365.33" />
-    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.4.0-preview.1.25365.33" />
+    <PackageReference Include="Aspire.OpenAI" Version="9.4.0-preview.1.25378.8" />
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.4.0" />
   </ItemGroup>
 
 </Project>
