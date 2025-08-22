@@ -33,12 +33,7 @@ public static class ChatClientExtensions
 
     private static ChatClientBuilder AddOpenAIClient(this IHostApplicationBuilder builder, string connectionName, ChatClientConnectionInfo connectionInfo)
     {
-        return builder.AddOpenAIClient(connectionName, settings =>
-        {
-            settings.Endpoint = connectionInfo.Endpoint;
-            settings.Key = connectionInfo.AccessKey;
-        })
-        .AddChatClient(connectionInfo.SelectedModel);
+        return builder.AddOpenAIClient(connectionName).AddChatClient();
     }
 
     private static ChatClientBuilder AddOllamaClient(this IHostApplicationBuilder builder, string connectionName, ChatClientConnectionInfo connectionInfo)
