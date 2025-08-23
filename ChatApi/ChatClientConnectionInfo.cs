@@ -40,6 +40,10 @@ public class ChatClientConnectionInfo
         {
             accessKey = (string)connectionBuilder["AccessKey"];
         }
+        else if (connectionBuilder.ContainsKey("Key"))
+        {
+            accessKey = (string)connectionBuilder["Key"];
+        }
 
         var provider = ClientChatProvider.Unknown;
         if (connectionBuilder.ContainsKey("Provider"))

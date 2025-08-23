@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.0-preview.1.25421.6" />
-    <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.4.0-preview.1.250420-0640" />
+    <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="9.7.0" />
   </ItemGroup>
 
   <ItemGroup>
