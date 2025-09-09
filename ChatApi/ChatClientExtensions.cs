@@ -51,7 +51,4 @@ public static class ChatClientExtensions
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_DisableTracing")]
     public static extern void SetDisableTracing(OllamaSharpSettings settings, bool value);
-
-
-
 }
