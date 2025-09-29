@@ -24,7 +24,7 @@ jobs:
         dotnet-version: '9.x'
 
     - name: Install Aspire CLI
-      run: dotnet tool install --global aspire.cli --prerelease
+      run: dotnet tool install --global aspire.cli
 
     - name: Run Aspire Publish
       run: aspire publish -p docker-compose -o artifacts
