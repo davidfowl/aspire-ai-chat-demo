@@ -50,19 +50,12 @@ public static class ModelExtensions
     {
         builder.Reset();
 
-        var apiKey = builder.ApplicationBuilder.AddParameter($"{builder.Resource.Name}-openai-api-key", secret:true)
-                                               .WithDescription("OpenAI API Key https://platform.openai.com/api-keys", enableMarkdown: true);
+        var oai = builder.ApplicationBuilder.AddOpenAI("oai");
 
-        var cs = builder.ApplicationBuilder.AddConnectionString(builder.Resource.Name, csb =>
-        {
-            csb.Append($"AccessKey={apiKey};");
-            csb.Append($"Model={modelName};");
-            csb.AppendLiteral("Endpoint=https://api.openai.com/v1;");
-            csb.AppendLiteral("Provider=OpenAI");
-        });
+        var model = oai.AddModel(builder.Resource.Name, modelName);
 
-        builder.Resource.UnderlyingResource = apiKey.Resource;
-        builder.Resource.ConnectionString = cs.Resource.ConnectionStringExpression;
+        builder.Resource.UnderlyingResource = model.Resource;
+        builder.Resource.ConnectionString = ReferenceExpression.Create($"{model};Provider=OpenAI");
 
         return builder;
     }

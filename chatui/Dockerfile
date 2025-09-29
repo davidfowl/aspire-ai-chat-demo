@@ -1,22 +1,11 @@
-# Build Stage: Build the React app
+# Stage 1: Build React app
 FROM node:22 AS builder
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
 COPY . .
+RUN npm install
 RUN npm run build
 
-# Production Stage: Serve the app with Caddy
-FROM caddy:2.9-alpine
-WORKDIR /usr/share/caddy
-
-# Copy built static files including index.html, etc.
-COPY --from=builder /app/build/ .
-
-# Copy the Caddyfile with reverse proxy config
-COPY Caddyfile /etc/caddy/Caddyfile
-
-EXPOSE 80
-
-# Run Caddy
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+# Stage 2: Copy static files to YARP container
+FROM mcr.microsoft.com/dotnet/nightly/yarp:2.3.0-preview.4 AS yarp
+WORKDIR /app
+COPY --from=builder /app/build ./wwwroot
