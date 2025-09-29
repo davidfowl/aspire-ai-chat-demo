@@ -20,8 +20,5 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
-  },
-  build: {
-    outDir: 'build'
   }
 } as UserConfig);
