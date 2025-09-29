@@ -18,6 +18,7 @@
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.5.0" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="9.5.0" />
     <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.0" />
+    <PackageReference Include="Aspire.Hosting.Yarp" Version="9.5.0-preview.1.25474.7" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.4.0" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="9.4.0" />
   </ItemGroup>
