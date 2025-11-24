@@ -47,26 +47,19 @@ var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
                      .WithReference(cache)
                      .WaitFor(cache);
 
-if (builder.ExecutionContext.IsRunMode)
-{
-    builder.AddJavaScriptApp("chatui-fe", "../chatui", "start")
-           .WithHttpEndpoint(env: "PORT")
-           .WithEnvironment("BACKEND_URL", chatapi.GetEndpoint("http"))
-           .WithOtlpExporter()
-           .WithEnvironment("BROWSER", "none");
-}
+var frontend = builder.AddViteApp("chatui-fe", "../chatui")
+                      .WithEnvironment("BACKEND_URL", chatapi.GetEndpoint("http"))
+                      .WithOtlpExporter()
+                      .WithEnvironment("BROWSER", "none");
 
-// We use YARP as the static file server and reverse proxy. This is used to test
-// the application in a containerized environment.
+// We use YARP as the static file server and reverse proxy.
 builder.AddYarp("chatui")
-       .WithStaticFiles()
        .WithExternalHttpEndpoints()
-       .WithDockerfile("../chatui")
+       .PublishWithStaticFiles(frontend)
        .WithConfiguration(c =>
        {
            c.AddRoute("/api/{**catch-all}", chatapi.GetEndpoint("http"));
-       })
-       .WithExplicitStart();
+       });
 
 builder.Build().Run();
 
