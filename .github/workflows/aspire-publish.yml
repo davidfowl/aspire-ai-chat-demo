@@ -39,9 +39,9 @@ jobs:
         BRANCH_NAME=${{ github.ref_name }}
         SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's#[^a-zA-Z0-9._-]#-#g')
         
-        # Query docker images and find the latest chatapi and chatui images
-        CHATAPI_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -i "chatapi" | grep -v "none" | head -n 1)
-        CHATUI_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -i "chatui" | grep -v "none" | head -n 1)
+        # Query docker images and find the latest chatapi and chatui images (most recently built)
+        CHATAPI_IMAGE=$(docker images --format "{{.CreatedAt}}\t{{.Repository}}:{{.Tag}}" | grep -E $'^\t[^/]*chatapi:' | sort -r | head -n 1 | awk '{print $NF}')
+        CHATUI_IMAGE=$(docker images --format "{{.CreatedAt}}\t{{.Repository}}:{{.Tag}}" | grep -E $'^\t[^/]*chatui:' | sort -r | head -n 1 | awk '{print $NF}')
         
         # Tag and push chatapi if found
         if [ -n "$CHATAPI_IMAGE" ]; then
