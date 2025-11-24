@@ -49,8 +49,7 @@ var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
 
 if (builder.ExecutionContext.IsRunMode)
 {
-    builder.AddNpmApp("chatui-fe", "../chatui")
-           .WithNpmPackageInstallation()
+    builder.AddJavaScriptApp("chatui-fe", "../chatui", "start")
            .WithHttpEndpoint(env: "PORT")
            .WithEnvironment("BACKEND_URL", chatapi.GetEndpoint("http"))
            .WithOtlpExporter()
