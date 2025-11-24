@@ -11,11 +11,11 @@ export default defineConfig({
     port,
     proxy: {
       '/api': {
-        target: process.env.BACKEND_URL,
+        target: process.env.CHATAPI_HTTPS || process.env.CHATAPI_HTTP,
         changeOrigin: true,
       },
       '/api/chat/stream': {
-        target: process.env.BACKEND_URL,
+        target: process.env.CHATAPI_HTTPS || process.env.CHATAPI_HTTP,
         ws: true,
         changeOrigin: true,
       }

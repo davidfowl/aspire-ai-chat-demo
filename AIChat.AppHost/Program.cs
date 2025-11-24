@@ -48,8 +48,7 @@ var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
                      .WaitFor(cache);
 
 var frontend = builder.AddViteApp("chatui-fe", "../chatui")
-                      .WithEnvironment("BACKEND_URL", chatapi.GetEndpoint("http"))
-                      .WithOtlpExporter()
+                      .WithReference(chatapi)
                       .WithEnvironment("BROWSER", "none");
 
 // We use YARP as the static file server and reverse proxy.
@@ -58,8 +57,9 @@ builder.AddYarp("chatui")
        .PublishWithStaticFiles(frontend)
        .WithConfiguration(c =>
        {
-           c.AddRoute("/api/{**catch-all}", chatapi.GetEndpoint("http"));
-       });
+           c.AddRoute("/api/{**catch-all}", chatapi);
+       })
+       .WithExplicitStart();
 
 builder.Build().Run();
 
