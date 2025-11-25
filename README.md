@@ -43,12 +43,15 @@ graph TB
     LLM -.->|Local| Ollama
     LLM -.->|Cloud| OpenAI
     
-    style YARP fill:#e1f5ff
-    style API fill:#fff3e0
-    style UI fill:#f3e5f5
-    style PG fill:#e8f5e9
-    style Redis fill:#ffebee
-    style LLM fill:#fff9c4
+    style YARP fill:#0078d4,stroke:#004578,stroke-width:2px,color:#fff
+    style API fill:#f37021,stroke:#b85419,stroke-width:2px,color:#fff
+    style UI fill:#5c2d91,stroke:#3d1e61,stroke-width:2px,color:#fff
+    style PG fill:#336791,stroke:#274466,stroke-width:2px,color:#fff
+    style Redis fill:#dc382d,stroke:#a52a22,stroke-width:2px,color:#fff
+    style LLM fill:#ffc107,stroke:#c79100,stroke-width:2px,color:#000
+    style User fill:#2d333b,stroke:#1c2128,stroke-width:2px,color:#fff
+    style Ollama fill:#4caf50,stroke:#388e3c,stroke-width:2px,color:#fff
+    style OpenAI fill:#10a37f,stroke:#0d8267,stroke-width:2px,color:#fff
 ```
 
 ## High-Level Overview
@@ -80,13 +83,13 @@ graph TB
 
 ### Running the Application
 
-Run the [AIChat.AppHost](AIChat.AppHost) project using the .NET Aspire tooling:
+Run the application:
 
 ```bash
 aspire run
 ```
 
-This project uses [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) to orchestrate the application components in containers.
+This project uses [Aspire](https://aspire.dev) to orchestrate the application components in containers.
 
 ### Configuration
 
@@ -95,12 +98,43 @@ This project uses [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/
 - The **PostgreSQL** database and **Redis** cache are automatically provisioned when running with Aspire.
 - Access the Aspire dashboard to monitor resources and view logs.
 
+### Deployment
+
+To deploy the application using Docker Compose:
+
+```bash
+aspire deploy
+```
+
+This generates a Docker Compose configuration in the `aspire-output` directory and runs the application stack. The deployment includes:
+
+- All application services (ChatApi, UI)
+- PostgreSQL database with persistent volume
+- Redis cache
+- Configured networking between services
+
+The application will be accessible at the configured ports, with all services orchestrated through Docker Compose.
+
 ## CI/CD
 
-The project includes a GitHub Actions workflow that:
+The project uses **Aspire's pipeline system** to build and publish container images. The custom `push-gh` pipeline step (defined in `PipelineExtensions.cs`) handles:
 
-- Builds container images for both the API and UI
-- Tags images with format: `<branch>-<build-number>-<git-sha>`
-- Pushes images to GitHub Container Registry (GHCR)
+- Building container images through Aspire's build pipeline
+- Tagging images with format: `<branch>-<build-number>-<git-sha>`
+- Pushing images to GitHub Container Registry (GHCR)
+
+The GitHub Actions workflow invokes the pipeline with environment variables:
+
+```yaml
+- name: Push to GitHub Container Registry
+  run: aspire do push-gh
+  env:
+    GHCR_REPO: ghcr.io/${{ github.repository_owner }}
+    BRANCH_NAME: ${{ github.ref_name }}
+    BUILD_NUMBER: ${{ github.run_number }}
+    GIT_SHA: ${{ github.sha }}
+```
+
+The Aspire pipeline step reads these values, sanitizes the branch name for Docker compatibility, creates a semantic tag, and pushes the images to GHCR. This approach integrates seamlessly with Aspire's orchestration, allowing the AppHost to define both local development and CI/CD workflows in one place.
 
 Images are available at: `ghcr.io/<owner>/chatapi` and `ghcr.io/<owner>/chatui`
