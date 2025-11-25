@@ -11,6 +11,7 @@ public static partial class PipelineExtensions
 {
     public static void AddGhcrPushStep(this IDistributedApplicationPipeline pipeline, IComputeResource[] resourcesToPublish)
     {
+        // This is is a single step that pushes multiple images to GitHub Container Registry
         pipeline.AddStep("push-gh", async context =>
         {
             var configuration = context.Services.GetRequiredService<IConfiguration>();
