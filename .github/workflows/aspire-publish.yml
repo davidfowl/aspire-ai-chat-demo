@@ -27,7 +27,7 @@ jobs:
       run: dotnet tool install --global aspire.cli
 
     - name: Run Aspire Do Build
-      run: aspire do build --log-level debug
+      run: aspire do build
       working-directory: AIChat.AppHost
 
     - name: Log in to GitHub Container Registry
