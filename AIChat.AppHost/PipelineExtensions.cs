@@ -38,11 +38,14 @@ public static partial class PipelineExtensions
 
                 if (localImageName is null && !resource.TryGetContainerImageName(out localImageName))
                 {
-                    context.Logger.LogWarning("{ImageName} image name not found, skipping", localImageName);
+                    context.Logger.LogWarning("{ImageName} image name not found, skipping", resource.Name);
                     continue;
                 }
 
-                var remoteTag = $"{ghcrRepo}/{localImageName}:{tag}";
+                // Sanitize resource name for Docker repository (lowercase, replace invalid chars with -)
+                var sanitizedResourceName = SanitizerRegex().Replace(resource.Name, "-").ToLowerInvariant();
+
+                var remoteTag = $"{ghcrRepo}/{sanitizedResourceName}:{tag}";
 
                 context.Logger.LogInformation("Tagging {LocalImage} as {RemoteTag}", localImageName, remoteTag);
 
