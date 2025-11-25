@@ -17,6 +17,7 @@
     <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.0.0" />
     <PackageReference Include="Aspire.Hosting.Yarp" Version="13.0.0" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="9.9.0" />
+    <PackageReference Include="CliWrap" Version="3.6.7" />
   </ItemGroup>
 
   <ItemGroup>
