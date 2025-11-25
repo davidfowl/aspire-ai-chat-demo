@@ -1,3 +1,6 @@
+using Aspire.Hosting.Pipelines;
+using AIChat.AppHost;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Publish this as a Docker Compose application
@@ -45,29 +48,38 @@ var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
                      .WithReference(db)
                      .WaitFor(db)
                      .WithReference(cache)
-                     .WaitFor(cache);
+                     .WaitFor(cache)
+                     .WithUrls(context =>
+                     {
+                         foreach (var u in context.Urls)
+                         {
+                             u.DisplayLocation = UrlDisplayLocation.DetailsOnly;
+                         }
 
-if (builder.ExecutionContext.IsRunMode)
-{
-    builder.AddNpmApp("chatui-fe", "../chatui")
-           .WithNpmPackageInstallation()
-           .WithHttpEndpoint(env: "PORT")
-           .WithEnvironment("BACKEND_URL", chatapi.GetEndpoint("http"))
-           .WithOtlpExporter()
-           .WithEnvironment("BROWSER", "none");
-}
+                         context.Urls.Add(new()
+                         {
+                             Url = "/scalar",
+                             DisplayText = "API Reference",
+                             Endpoint = context.GetEndpoint("https")
+                         });
+                     });
 
-// We use YARP as the static file server and reverse proxy. This is used to test
-// the application in a containerized environment.
-builder.AddYarp("chatui")
-       .WithStaticFiles()
+var frontend = builder.AddViteApp("chatuife", "../chatui")
+                      .WithReference(chatapi)
+                      .WithEnvironment("BROWSER", "none")
+                      .WithUrl("", "Chat UI");
+
+// We use YARP as the static file server and reverse proxy.
+var yarp =builder.AddYarp("chatui")
        .WithExternalHttpEndpoints()
-       .WithDockerfile("../chatui")
+       .PublishWithStaticFiles(frontend)
        .WithConfiguration(c =>
        {
-           c.AddRoute("/api/{**catch-all}", chatapi.GetEndpoint("http"));
+           c.AddRoute("/api/{**catch-all}", chatapi);
        })
        .WithExplicitStart();
 
-builder.Build().Run();
+// Add a push to GitHub Container Registry step
+builder.Pipeline.AddGhcrPushStep([chatapi.Resource, yarp.Resource]);
 
+builder.Build().Run();

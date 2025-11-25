@@ -8,3 +8,6 @@ dotnet_diagnostic.ASPIREPROXYENDPOINTS001.severity = none
 
 # ASPIREAZURE001: Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 dotnet_diagnostic.ASPIREAZURE001.severity = none
+
+# ASPIREPIPELINES001: Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+dotnet_diagnostic.ASPIREPIPELINES001.severity = silent
