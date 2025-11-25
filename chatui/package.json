@@ -2,11 +2,11 @@
   "name": "my-react-app",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "vite",
+    "dev": "vite",
     "build": "vite build",
-    "test": "vite test",
-    "eject": "react-scripts eject"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.7",
@@ -16,23 +16,6 @@
     "react-markdown": "^9.0.3",
     "react-router-dom": "^7.2.0",
     "react-window": "^1.8.11"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "devDependencies": {
     "@types/node": "^22.13.8",
