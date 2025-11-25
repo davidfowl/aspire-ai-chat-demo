@@ -47,7 +47,7 @@ var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
                      .WithReference(cache)
                      .WaitFor(cache);
 
-var frontend = builder.AddViteApp("chatui-fe", "../chatui")
+var frontend = builder.AddViteApp("chatuife", "../chatui")
                       .WithReference(chatapi)
                       .WithEnvironment("BROWSER", "none");
 
