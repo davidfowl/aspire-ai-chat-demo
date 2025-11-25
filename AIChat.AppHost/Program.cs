@@ -1,6 +1,5 @@
 using Aspire.Hosting.Pipelines;
-using CliWrap;
-using Microsoft.Extensions.Logging;
+using AIChat.AppHost;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -81,51 +80,6 @@ var yarp =builder.AddYarp("chatui")
        .WithExplicitStart();
 
 // Add a push to GitHub Container Registry step
-// that will be executed from the pipeline
-builder.Pipeline.AddStep("push-gh", async context =>
-{
-    // Get configuration values
-    var ghcrRepo = builder.Configuration["GHCR_REPO"] ?? throw new InvalidOperationException("GHCR_REPO environment variable is required");
-    var tagSuffix = builder.Configuration["TAG_SUFFIX"] ?? "latest";
-    
-    var resourcesToPublish = new (IResource resource, string imageName)[] 
-    { 
-        (chatapi.Resource, "chatapi"),
-        (yarp.Resource, "chatui")
-    };
-
-    foreach (var (resource, imageName) in resourcesToPublish)
-    {
-        // For project resources, use hardcoded "latest" tag
-        var localImageName = resource is ProjectResource ? $"{imageName}:latest" : null;
-        
-        if (localImageName is null && !resource.TryGetContainerImageName(out localImageName))
-        {
-            context.Logger.LogWarning("{ImageName} image name not found, skipping", imageName);
-            continue;
-        }
-
-        var remoteTag = $"{ghcrRepo}/{imageName}:{tagSuffix}";
-        
-        context.Logger.LogInformation("Tagging {LocalImage} as {RemoteTag}", localImageName, remoteTag);
-        
-        // Tag the image
-        await Cli.Wrap("docker")
-            .WithArguments(["tag", localImageName, remoteTag])
-            .WithStandardOutputPipe(PipeTarget.ToDelegate(line => context.Logger.LogDebug("{Output}", line)))
-            .WithStandardErrorPipe(PipeTarget.ToDelegate(line => context.Logger.LogError("{Error}", line)))
-            .ExecuteAsync();
-        
-        context.Logger.LogInformation("Pushing {RemoteTag}", remoteTag);
-        
-        // Push the image
-        await Cli.Wrap("docker")
-            .WithArguments(["push", remoteTag])
-            .WithStandardOutputPipe(PipeTarget.ToDelegate(line => context.Logger.LogDebug("{Output}", line)))
-            .WithStandardErrorPipe(PipeTarget.ToDelegate(line => context.Logger.LogError("{Error}", line)))
-            .ExecuteAsync();
-    }
-}, 
-dependsOn: WellKnownPipelineSteps.Build);
+builder.Pipeline.AddGhcrPushStep([chatapi.Resource, yarp.Resource]);
 
 builder.Build().Run();
