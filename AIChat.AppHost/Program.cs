@@ -45,11 +45,26 @@ var chatapi = builder.AddProject<Projects.ChatApi>("chatapi")
                      .WithReference(db)
                      .WaitFor(db)
                      .WithReference(cache)
-                     .WaitFor(cache);
+                     .WaitFor(cache)
+                     .WithUrls(context =>
+                     {
+                         foreach (var u in context.Urls)
+                         {
+                             u.DisplayLocation = UrlDisplayLocation.DetailsOnly;
+                         }
+
+                         context.Urls.Add(new()
+                         {
+                             Url = "/scalar",
+                             DisplayText = "API Reference",
+                             Endpoint = context.GetEndpoint("https")
+                         });
+                     });
 
 var frontend = builder.AddViteApp("chatuife", "../chatui")
                       .WithReference(chatapi)
-                      .WithEnvironment("BROWSER", "none");
+                      .WithEnvironment("BROWSER", "none")
+                      .WithUrl("", "Chat UI");
 
 // We use YARP as the static file server and reverse proxy.
 builder.AddYarp("chatui")

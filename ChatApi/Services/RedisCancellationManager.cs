@@ -18,7 +18,7 @@ public class RedisCancellationManager : ICancellationManager, IDisposable
 
     private void OnCancellationMessage(RedisChannel channel, RedisValue message)
     {
-        if (Guid.TryParse(message, out Guid replyId))
+        if (Guid.TryParse((ReadOnlySpan<byte>)message, out Guid replyId))
         {
             _logger.LogInformation("Received cancellation message for reply {ReplyId}", replyId);
 

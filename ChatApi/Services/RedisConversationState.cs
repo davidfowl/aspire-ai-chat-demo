@@ -128,7 +128,7 @@ public partial class RedisConversationState : IConversationState, IDisposable
         var values = await _db.ListRangeAsync(key);
         for (int i = 0; i < values.Length; i++)
         {
-            var fragment = JsonSerializer.Deserialize<ClientMessageFragment>(values[i]!);
+            var fragment = JsonSerializer.Deserialize<ClientMessageFragment>((ReadOnlySpan<byte>)values[i]!);
             if (fragment is not null && (lastMessageId is null || fragment.Id > lastMessageId))
             {
                 yield return fragment;
@@ -169,7 +169,7 @@ public partial class RedisConversationState : IConversationState, IDisposable
 
         for (int i = 0; i < values.Length; i++)
         {
-            var fragment = JsonSerializer.Deserialize<ClientMessageFragment>(values[i]!);
+            var fragment = JsonSerializer.Deserialize<ClientMessageFragment>((ReadOnlySpan<byte>)values[i]!);
             if (fragment is not null)
             {
                 fragments.Add(fragment);
